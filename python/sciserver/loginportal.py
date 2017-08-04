@@ -1,27 +1,35 @@
-__author__ = 'mtaghiza, gerard'
-#Python v3.4
+# !usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Licensed under a 3-clause BSD license.
+#
+# @Author: Brian Cherinka
+# @Date:   2017-08-04 15:29:22
+# @Last modified by:   Brian Cherinka
+# @Last Modified time: 2017-08-04 16:01:31
 
-import json
-import sys
-import requests
-import os.path
+from __future__ import print_function, division, absolute_import
 import warnings
-import SciServer.Authentication;
+import sciserver.authentication as auth
+
+__author__ = 'mtaghiza, gerard'
 
 
-class KeystoneUser:
+class KeystoneUser(object):
     """
-    .. warning:: Deprecated. Use SciServer.Authentication.KeystoneUser instead.\n
+    .. warning:: Deprecated. Use auth.KeystoneUser instead.\n
 
     The class KeystoneUser stores the 'id' and 'name' of the user.
     """
-    warnings.warn("Using SciServer.LoginPortal.KeystoneUser is deprecated. Use SciServer.Authentication.KeystoneUser instead.", DeprecationWarning, stacklevel=2);
+    warnings.warn("Using SciServer.LoginPortal.KeystoneUser is deprecated. \
+        Use auth.KeystoneUser instead.", DeprecationWarning, stacklevel=2)
     id = "KeystoneID"
     userName = "User Name"
 
+
 def getKeystoneUserWithToken(token):
     """
-    .. warning:: Deprecated. Use SciServer.Authentication.getKeystoneUserWithToken instead.\n
+    .. warning:: Deprecated. Use auth.getKeystoneUserWithToken instead.\n
 
     Returns the name and Keystone id of the user corresponding to the specified token.
 
@@ -32,18 +40,22 @@ def getKeystoneUserWithToken(token):
 
     .. seealso:: Authentication.getToken, Authentication.login, Authentication.setToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneUserWithToken is deprecated. Use SciServer.Authentication.getKeystoneUserWithToken instead.", DeprecationWarning, stacklevel=2);
-    return SciServer.Authentication.getKeystoneUserWithToken(token);
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneUserWithToken is deprecated. \
+        Use auth.getKeystoneUserWithToken instead.", DeprecationWarning, stacklevel=2)
+    return auth.getKeystoneUserWithToken(token)
+
 
 def login(UserName, Password):
     """
-    .. warning:: Deprecated. Use SciServer.Authentication.login instead.\n
+    .. warning:: Deprecated. Use auth.login instead.\n
 
     Logs the user into SciServer and returns the authentication token.
-    This function is useful when SciScript-Python library methods are executed outside the SciServer-Compute environment.
-    In this case, the session authentication token does not exist (and therefore can't be automatically recognized),
-    so the user has to use Authentication.login in order to log into SciServer manually and get the authentication token.
-    Authentication.login also sets the token value in the python instance argument variable "--ident", and as the local object Authentication.token (of class Authentication.Token).
+    This function is useful when SciScript-Python library methods are executed outside the
+    SciServer-Compute environment.  In this case, the session authentication token does not
+    exist (and therefore can't be automatically recognized), so the user has to use Authentication.login
+    in order to log into SciServer manually and get the authentication token. authentication.login also
+    sets the token value in the python instance argument variable "--ident", and as the local
+    object authentication.token (of class Authentication.Token).
 
     :param UserName: name of the user (string)
     :param Password: password of the user (string)
@@ -53,12 +65,14 @@ def login(UserName, Password):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.getToken, Authentication.setToken, Authentication.token.
     """
-    warnings.warn("Using SciServer.LoginPortal.login is deprecated. Use SciServer.Authentication.login instead.", DeprecationWarning, stacklevel=2);
-    return SciServer.Authentication.login(UserName, Password);
+    warnings.warn("Using SciServer.LoginPortal.login is deprecated. \
+        Use auth.login instead.", DeprecationWarning, stacklevel=2)
+    return auth.login(UserName, Password)
+
 
 def getToken():
     """
-    .. warning:: Deprecated. Use SciServer.Authentication.getToken instead.\n
+    .. warning:: Deprecated. Use auth.getToken instead.\n
 
     Returns the SciServer authentication token of the user. First, will try to return Authentication.token.value.
     If Authentication.token.value is not set, Authentication.getToken will try to return the token value in the python instance argument variable "--ident".
@@ -70,12 +84,14 @@ def getToken():
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token.
 
     """
-    warnings.warn("Using SciServer.LoginPortal.getToken is deprecated. Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2);
-    return SciServer.Authentication.getToken();
+    warnings.warn("Using SciServer.LoginPortal.getToken is deprecated. \
+        Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
+    return auth.getToken()
+
 
 def identArgIdentifier():
     """
-    .. warning:: Deprecated. Use SciServer.Authentication.identArgIdentifier instead.\n
+    .. warning:: Deprecated. Use auth.identArgIdentifier instead.\n
 
     Returns the name of the python instance argument variable where the user token is stored.
 
@@ -84,8 +100,10 @@ def identArgIdentifier():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
     """
-    warnings.warn("Using SciServer.Authentication.identArgIdentifier is deprecated. Use SciServer.Authentication.identArgIdentifier instead.", DeprecationWarning, stacklevel=2);
-    return SciServer.Authentication.identArgIdentifier();
+    warnings.warn("Using auth.identArgIdentifier is deprecated. \
+        Use auth.identArgIdentifier instead.", DeprecationWarning, stacklevel=2)
+    return auth.identArgIdentifier()
+
 
 def getKeystoneToken():
     """
@@ -98,8 +116,10 @@ def getKeystoneToken():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2);
-    return SciServer.Authentication.getKeystoneToken();
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. \
+        Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
+    return auth.getKeystoneToken()
+
 
 def setKeystoneToken(token):
     """
@@ -112,5 +132,7 @@ def setKeystoneToken(token):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2);
-    SciServer.Authentication.setKeystoneToken(token);
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. \
+        Use auth.setToken instead.", DeprecationWarning, stacklevel=2)
+    auth.setKeystoneToken(token)
+

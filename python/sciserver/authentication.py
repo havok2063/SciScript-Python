@@ -1,31 +1,41 @@
-__author__ = 'gerard,mtaghiza'
-#Python v3.4
+# !usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Licensed under a 3-clause BSD license.
+#
+# @Author: Brian Cherinka
+# @Date:   2017-08-04 14:41:52
+# @Last modified by:   Brian Cherinka
+# @Last Modified time: 2017-08-04 16:03:22
 
+from __future__ import print_function, division, absolute_import
 import json
 import sys
-import requests
 import os.path
 import warnings
+import requests
+from sciserver import config
 
-from SciServer import Config
+__author__ = 'gerard,mtaghiza'
 
 
-
-class KeystoneUser:
+class KeystoneUser(object):
     """
     The class KeystoneUser stores the 'id' and 'name' of the user.
     """
     id = None
     userName = None
 
-class Token:
+
+class Token(object):
     """
     The class token stores the authentication token of the user in a particular session.
     """
     value = None
 
 
-token = Token();
+token = Token()
+
 
 def getKeystoneUserWithToken(token):
     """
@@ -38,14 +48,16 @@ def getKeystoneUserWithToken(token):
 
     .. seealso:: Authentication.getToken, Authentication.login, Authentication.setToken.
     """
-    loginURL = Config.AuthenticationURL
+    loginURL = config.AuthenticationURL
     if ~loginURL.endswith("/"):
         loginURL = loginURL + "/"
     loginURL = loginURL + token
 
     getResponse = requests.get(loginURL)
     if getResponse.status_code != 200:
-        raise Exception("Error when getting the keystone user with token " + str(token) +".\nHttp Response from the Authentication API returned status code " + str(getResponse.status_code) + ":\n" + getResponse.content.decode());
+        raise Exception("Error when getting the keystone user with token {0}.\
+            Http Response from the Authentication API returned status code {1}: \
+            \n{2}".format(token, getResponse.status_code, getResponse.content.decode()))
 
     responseJson = json.loads((getResponse.content.decode()))
 
@@ -59,10 +71,12 @@ def getKeystoneUserWithToken(token):
 def login(UserName, Password):
     """
     Logs the user into SciServer and returns the authentication token.
-    This function is useful when SciScript-Python library methods are executed outside the SciServer-Compute environment.
-    In this case, the session authentication token does not exist (and therefore can't be automatically recognized),
-    so the user has to use Authentication.login in order to log into SciServer manually and get the authentication token.
-    Authentication.login also sets the token value in the python instance argument variable "--ident", and as the local object Authentication.token (of class Authentication.Token).
+    This function is useful when SciScript-Python library methods are executed outside
+    the SciServer-Compute environment. In this case, the session authentication token
+    does not exist (and therefore can't be automatically recognized), so the user has to use
+    Authentication.login in order to log into SciServer manually and get the authentication token.
+    Authentication.login also sets the token value in the python instance argument variable
+    "--ident", and as the local object Authentication.token (of class Authentication.Token).
 
     :param UserName: name of the user (string)
     :param Password: password of the user (string)
@@ -72,27 +86,31 @@ def login(UserName, Password):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.getToken, Authentication.setToken, Authentication.token.
     """
-    loginURL = Config.AuthenticationURL
+    loginURL = config.AuthenticationURL
 
-    authJson = {"auth":{"identity":{"password":{"user":{"name":UserName,"password":Password}}}}}
+    authJson = {"auth": {"identity": {"password": {"user": {"name": UserName, "password": Password}}}}}
 
     data = json.dumps(authJson).encode()
 
-    headers={'Content-Type': "application/json"}
+    headers = {'Content-Type': "application/json"}
 
-    postResponse = requests.post(loginURL,data=data,headers=headers)
+    postResponse = requests.post(loginURL, data=data, headers=headers)
     if postResponse.status_code != 200:
-        raise Exception("Error when logging in. Http Response from the Authentication API returned status code " + str(postResponse.status_code) + ":\n" + postResponse.content.decode());
+        raise Exception("Error when logging in. Http Response from the Authentication API returned \
+            status code {0}: \n {1}".format(postResponse.status_code, postResponse.content.decode()))
 
     _token = postResponse.headers['X-Subject-Token']
     setToken(_token)
     return _token
 
+
 def getToken():
     """
-    Returns the SciServer authentication token of the user. First, will try to return Authentication.token.value.
-    If Authentication.token.value is not set, Authentication.getToken will try to return the token value in the python instance argument variable "--ident".
-    If this variable does not exist, will try to return the token stored in Config.KeystoneTokenFilePath. Will return a None value if all previous steps fail.
+    Returns the SciServer authentication token of the user. First, will try to
+    return Authentication.token.value. If Authentication.token.value is not set,
+    Authentication.getToken will try to return the token value in the python instance
+    argument variable "--ident". If this variable does not exist, will try to return the token
+    stored in config.KeystoneTokenFilePath. Will return a None value if all previous steps fail.
 
     :return: authentication token (string)
     :example: token = Authentication.getToken()
@@ -102,13 +120,13 @@ def getToken():
     """
     try:
 
-        if Config.isSciServerComputeEnvironment():
-            tokenFile = Config.KeystoneTokenPath;  # '/home/idies/keystone.token'
+        if config.isSciServerComputeEnvironment():
+            tokenFile = config.KeystoneTokenPath  # '/home/idies/keystone.token'
             if os.path.isfile(tokenFile):
                 with open(tokenFile, 'r') as f:
                     _token = f.read().rstrip('\n')
                     if _token is not None and _token != "":
-                        token.value = _token;
+                        token.value = _token
 
                         found = False
                         ident = identArgIdentifier()
@@ -122,11 +140,13 @@ def getToken():
 
                         return _token
                     else:
-                        warnings.warn("In Authentication.getToken: Cannot find token in system token file " + str(Config.KeystoneTokenPath) + ".", Warning, stacklevel=2)
-                        return None;
+                        warnings.warn("In Authentication.getToken: Cannot find token in system \
+                            token file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
+                        return None
             else:
-                 warnings.warn("In Authentication.getToken: Cannot find system token file " + str(Config.KeystoneTokenPath) + ".", Warning, stacklevel=2)
-                 return None;
+                warnings.warn("In Authentication.getToken: Cannot find system token \
+                    file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
+                return None
         else:
             if token.value is not None:
                 return token.value
@@ -141,16 +161,19 @@ def getToken():
                     token.value = _token
                     return _token
                 else:
-                    warnings.warn("In Authentication.getToken: Authentication token is not defined: the user did not log in with the Authentication.login function, or the token has not been stored in the command line argument --ident.", Warning, stacklevel=2)
-                    return None;
+                    warnings.warn("In Authentication.getToken: Authentication token is not defined: \
+                        the user did not log in with the Authentication.login function, or the token \
+                        has not been stored in the command line argument --ident.", Warning, stacklevel=2)
+                    return None
 
     except Exception as e:
-        raise e;
+        raise e
 
 
 def setToken(_token):
     """
-    Sets the SciServer authentication token of the user in the variable Authentication.token.value, as well as in the python instance argument variable "--ident".
+    Sets the SciServer authentication token of the user in the variable Authentication.token.value,
+    as well as in the python instance argument variable "--ident".
 
     :param _token: Sciserver's authentication token for the user (string)
     :example: Authentication.setToken('myToken')
@@ -162,10 +185,11 @@ def setToken(_token):
     if _token == "":
         warnings.warn("Authentication token is being set as an empty string.", Warning, stacklevel=2)
 
-    if Config.isSciServerComputeEnvironment():
-        warnings.warn("Authentication token cannot be set to arbitary value when inside SciServer-Compute environment.", Warning, stacklevel=2)
+    if config.isSciServerComputeEnvironment():
+        warnings.warn("Authentication token cannot be set to arbitary value when inside \
+            SciServer-Compute environment.", Warning, stacklevel=2)
     else:
-        token.value = _token;
+        token.value = _token
 
         found = False
         ident = identArgIdentifier()
@@ -201,7 +225,8 @@ def getKeystoneToken():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.Authentication.getKeystoneToken is deprecated. Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.Authentication.getKeystoneToken is deprecated. \
+        Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2)
 
     _token = None
     ident = identArgIdentifier()
@@ -209,8 +234,8 @@ def getKeystoneToken():
         if (arg.startswith(ident)):
             _token = arg[len(ident):]
 
-    #if (_token == ""):
-    #    raise EnvironmentError("Keystone token is not in the command line argument --ident.")
+    # if (_token == ""):
+    #     raise EnvironmentError("Keystone token is not in the command line argument --ident.")
     if _token is None or _token == "":
         warnings.warn("Keystone token is not defined, and is not stored in the command line argument --ident.", Warning, stacklevel=2)
 
@@ -228,7 +253,8 @@ def setKeystoneToken(_token):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.Authentication.setKeystoneToken is deprecated. Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.Authentication.setKeystoneToken is deprecated. \
+        Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2)
 
     if _token is None:
         warnings.warn("Authentication token is being set with a None value.", Warning, stacklevel=2)
