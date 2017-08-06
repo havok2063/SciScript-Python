@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:41:52
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:03:22
+# @Last Modified time: 2017-08-06 17:21:12
 
 from __future__ import print_function, division, absolute_import
 import json
@@ -55,9 +55,9 @@ def getKeystoneUserWithToken(token):
 
     getResponse = requests.get(loginURL)
     if getResponse.status_code != 200:
-        raise Exception("Error when getting the keystone user with token {0}.\
-            Http Response from the Authentication API returned status code {1}: \
-            \n{2}".format(token, getResponse.status_code, getResponse.content.decode()))
+        raise Exception("Error when getting the keystone user with token {0}."
+                        "Http Response from the Authentication API returned status code {1}:"
+                        "\n {2}".format(token, getResponse.status_code, getResponse.content.decode()))
 
     responseJson = json.loads((getResponse.content.decode()))
 
@@ -96,8 +96,8 @@ def login(UserName, Password):
 
     postResponse = requests.post(loginURL, data=data, headers=headers)
     if postResponse.status_code != 200:
-        raise Exception("Error when logging in. Http Response from the Authentication API returned \
-            status code {0}: \n {1}".format(postResponse.status_code, postResponse.content.decode()))
+        raise Exception("Error when logging in. Http Response from the Authentication API returned "
+                        "status code {0}: \n {1}".format(postResponse.status_code, postResponse.content.decode()))
 
     _token = postResponse.headers['X-Subject-Token']
     setToken(_token)
@@ -140,12 +140,12 @@ def getToken():
 
                         return _token
                     else:
-                        warnings.warn("In Authentication.getToken: Cannot find token in system \
-                            token file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
+                        warnings.warn("In Authentication.getToken: Cannot find token in system "
+                                      "token file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
                         return None
             else:
-                warnings.warn("In Authentication.getToken: Cannot find system token \
-                    file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
+                warnings.warn("In Authentication.getToken: Cannot find system token "
+                              "file {0}.".format(config.KeystoneTokenPath), Warning, stacklevel=2)
                 return None
         else:
             if token.value is not None:
@@ -161,9 +161,9 @@ def getToken():
                     token.value = _token
                     return _token
                 else:
-                    warnings.warn("In Authentication.getToken: Authentication token is not defined: \
-                        the user did not log in with the Authentication.login function, or the token \
-                        has not been stored in the command line argument --ident.", Warning, stacklevel=2)
+                    warnings.warn("In Authentication.getToken: Authentication token is not defined: "
+                                  "the user did not log in with the Authentication.login function, or the token "
+                                  "has not been stored in the command line argument --ident.", Warning, stacklevel=2)
                     return None
 
     except Exception as e:
@@ -186,8 +186,8 @@ def setToken(_token):
         warnings.warn("Authentication token is being set as an empty string.", Warning, stacklevel=2)
 
     if config.isSciServerComputeEnvironment():
-        warnings.warn("Authentication token cannot be set to arbitary value when inside \
-            SciServer-Compute environment.", Warning, stacklevel=2)
+        warnings.warn("Authentication token cannot be set to arbitary value when inside "
+                      "SciServer-Compute environment.", Warning, stacklevel=2)
     else:
         token.value = _token
 
@@ -225,8 +225,8 @@ def getKeystoneToken():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.Authentication.getKeystoneToken is deprecated. \
-        Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.Authentication.getKeystoneToken is deprecated."
+                  "Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2)
 
     _token = None
     ident = identArgIdentifier()
@@ -253,8 +253,8 @@ def setKeystoneToken(_token):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.Authentication.setKeystoneToken is deprecated. \
-        Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.Authentication.setKeystoneToken is deprecated."
+                  "Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2)
 
     if _token is None:
         warnings.warn("Authentication token is being set with a None value.", Warning, stacklevel=2)

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:00:25
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:25:03
+# @Last Modified time: 2017-08-06 17:28:15
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO
@@ -46,8 +46,9 @@ def getJobStatus(jobId):
             r = response.json()
             return(r['queryJob'])
         else:
-            raise Exception("Error when getting the job status of job {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(jobId, response.status_code, response.content.decode()))
+            raise Exception("Error when getting the job status of job {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -85,8 +86,9 @@ def cancelJob(jobId):
             #     return False;
             return True
         else:
-            raise Exception("Error when cancelling job {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(jobId, response.status_code, response.content.decode()))
+            raise Exception("Error when cancelling job {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -114,8 +116,8 @@ def listQueues():
             r = response.json()
             return(r['queues'])
         else:
-            raise Exception("Error when listing queues.\nHttp Response from SkyQuery \
-                API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+            raise Exception("Error when listing queues.\nHttp Response from SkyQuery "
+                            "API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -145,8 +147,9 @@ def getQueueInfo(queue):
             r = response.json()
             return(r['queue'])
         else:
-            raise Exception("Error when getting queue info of {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(queue, response.status_code, response.content.decode()))
+            raise Exception("Error when getting queue info of {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(queue, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -181,8 +184,9 @@ def submitJob(query, queue='quick'):
             r = response.json()
             return(r['queryJob']['guid'])
         else:
-            raise Exception("Error when submitting job on queue {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(queue, response.status_code, response.content.decode()))
+            raise Exception("Error when submitting job on queue {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(queue, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -247,8 +251,9 @@ def listJobs(queue="quick"):
             r = response.json()
             return(r['jobs'])
         else:
-            raise Exception("Error when listing jobs on queue {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(queue, response.status_code, response.content.decode()))
+            raise Exception("Error when listing jobs on queue {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(queue, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -282,8 +287,9 @@ def listAllDatasets():
             r = response.json()
             return(r['datasets'])
         else:
-            raise Exception("Error when listing all datasets. \
-                Http Response from SkyQuery API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+            raise Exception("Error when listing all datasets. "
+                            "Http Response from SkyQuery API returned status code {0}:"
+                            "\n {1}".format(response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -311,8 +317,9 @@ def getDatasetInfo(datasetName="MyDB"):
         if response.status_code == 200:
             return(response.json())
         else:
-            raise Exception("Error when getting info from dataset {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when getting info from dataset {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -341,8 +348,9 @@ def listDatasetTables(datasetName="MyDB"):
             r = response.json()
             return(r['tables'])
         else:
-            raise Exception("Error when listing tables in dataset {0}. \
-                Http Response from SkyQuery API returned status code {1}:\n {2}".format(datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when listing tables in dataset {0}. "
+                            "Http Response from SkyQuery API returned status code {1}:"
+                            "\n {2}".format(datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -371,8 +379,9 @@ def getTableInfo(tableName, datasetName="MyDB"):
         if response.status_code == 200:
             return(response.json())
         else:
-            raise Exception("Error when getting info of table {0} in dataset {1}.\
-                Http Response from SkyQuery API returned status code {2}:\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when getting info of table {0} in dataset {1}. "
+                            "Http Response from SkyQuery API returned status code {2}:"
+                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -402,8 +411,9 @@ def listTableColumns(tableName, datasetName="MyDB"):
             r = response.json()
             return(r['columns'])
         else:
-            raise Exception("Error when listing columns of table {0} in dataset {1}.\
-                Http Response from SkyQuery API returned status code {2}:\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when listing columns of table {0} in dataset {1}. "
+                            "Http Response from SkyQuery API returned status code {2}:"
+                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -439,8 +449,9 @@ def getTable(tableName, datasetName="MyDB", top=None):
         if response.status_code == 200:
             return(pandas.read_csv(StringIO(response.content.decode()), sep="\t"))
         else:
-            raise Exception("Error when getting table {0} from dataset {1}.\
-                Http Response from SkyQuery API returned status code {2}:\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when getting table {0} from dataset {1}. "
+                            "Http Response from SkyQuery API returned status code {2}:"
+                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -469,8 +480,9 @@ def dropTable(tableName, datasetName="MyDB"):
         if response.status_code == 200:
             return (True)
         else:
-            raise Exception("Error when dropping table {0} in dataset {1}.\
-                Http Response from SkyQuery API returned status code {2}:\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when dropping table {0} in dataset {1}. "
+                            "Http Response from SkyQuery API returned status code {2}:"
+                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 
@@ -506,8 +518,9 @@ def uploadTable(uploadData, tableName, datasetName="MyDB", outformat="csv"):
         if response.status_code == 200:
             return (True)
         else:
-            raise Exception("Error when uploading data to table {0} in dataset {1}.\
-                Http Response from SkyQuery API returned status code {2}:\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+            raise Exception("Error when uploading data to table {0} in dataset {1}. "
+                            "Http Response from SkyQuery API returned status code {2}:"
+                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
     else:
         raise Exception("User token is not defined. First log into SciServer.")
 

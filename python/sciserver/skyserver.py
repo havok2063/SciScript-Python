@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:25:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:50:38
+# @Last Modified time: 2017-08-06 17:29:31
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -56,8 +56,9 @@ def sqlSearch(sql, dataRelease=None):
 
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code != 200:
-        raise Exception("Error when executing a sql query. \
-            Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+        raise Exception("Error when executing a sql query. "
+                        "Http Response from SkyServer API returned status code {0}:"
+                        "\n {1}".format(response.status_code, response.content.decode()))
 
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
@@ -135,11 +136,13 @@ def getJpegImgCutout(ra, dec, scale=0.7, width=512, height=512, opt="", query=""
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code != 200:
         if response.status_code == 404 or response.status_code == 500:
-            raise Exception("Error when getting an image cutout. \
-                Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.reason))
+            raise Exception("Error when getting an image cutout. "
+                            "Http Response from SkyServer API returned status code {0}:"
+                            "\n {1}".format(response.status_code, response.reason))
         else:
-            raise Exception("Error when getting an image cutout. \
-                Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+            raise Exception("Error when getting an image cutout. "
+                            "Http Response from SkyServer API returned status code {0}:"
+                            "\n {1}".format(response.status_code, response.content.decode()))
     return skimage.io.imread(BytesIO(response.content))
 
 
@@ -194,8 +197,9 @@ def radialSearch(ra, dec, radius=1, coordType="equatorial", whichPhotometry="opt
 
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code != 200:
-        raise Exception("Error when executing a radial search. \
-            Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+        raise Exception("Error when executing a radial search. "
+                        "Http Response from SkyServer API returned status code {0}:"
+                        "\n {1}".format(response.status_code, response.content.decode()))
 
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
@@ -255,8 +259,9 @@ def rectangularSearch(min_ra, max_ra, min_dec, max_dec, coordType="equatorial", 
 
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code != 200:
-        raise Exception("Error when executing a rectangular search. \
-            Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+        raise Exception("Error when executing a rectangular search. "
+                        "Http Response from SkyServer API returned status code {0}:"
+                        "\n {1}".format(response.status_code, response.content.decode()))
 
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
@@ -345,8 +350,9 @@ def objectSearch(objId=None, specObjId=None, apogee_id=None, apstar_id=None, ra=
 
     response = requests.get(url, headers=headers, stream=True)
     if response.status_code != 200:
-        raise Exception("Error when doing an object search. \
-            Http Response from SkyServer API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+        raise Exception("Error when doing an object search. "
+                        "Http Response from SkyServer API returned status code {0}:"
+                        "\n {1}".format(response.status_code, response.content.decode()))
 
     r = response.json()
     return r

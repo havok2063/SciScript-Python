@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:02:53
+# @Last Modified time: 2017-08-06 17:23:00
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -36,8 +36,8 @@ def getSchemaName():
         headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
         getResponse = requests.get(usersUrl, headers=headers)
         if getResponse.status_code != 200:
-            raise Exception("Error when getting schema name. Http Response from CasJobs API \
-                returned status code {0}: \n{1}".format(getResponse.status_code, getResponse.content.decode()))
+            raise Exception("Error when getting schema name. Http Response from CasJobs API "
+                            "returned status code {0}: \n{1}".format(getResponse.status_code, getResponse.content.decode()))
 
         jsonResponse = json.loads(getResponse.content.decode())
         return "wsid_" + str(jsonResponse["WebServicesId"])
@@ -68,9 +68,9 @@ def getTables(context="MyDB"):
         getResponse = requests.get(TablesUrl, headers=headers)
 
         if getResponse.status_code != 200:
-            raise Exception("Error when getting table description from database \
-                context {0}. \nHttp Response from CasJobs API returned status \
-                code {1}: \n{2}".format(context, getResponse.status_code, getResponse.content.decode()))
+            raise Exception("Error when getting table description from database "
+                            "context {0}. \nHttp Response from CasJobs API returned status "
+                            "code {1}: \n{2}".format(context, getResponse.status_code, getResponse.content.decode()))
 
         jsonResponse = json.loads(getResponse.content.decode())
 
@@ -131,8 +131,8 @@ def executeQuery(sql, context="MyDB", outformat="pandas"):
 
     postResponse = requests.post(QueryUrl, data=data, headers=headers, stream=True)
     if postResponse.status_code != 200:
-        raise Exception("Error when executing query. Http Response from CasJobs API \
-            returned status code {0}: \n{1}".format(postResponse.status_code, postResponse.content.decode()))
+        raise Exception("Error when executing query. Http Response from CasJobs API "
+                        "returned status code {0}: \n{1}".format(postResponse.status_code, postResponse.content.decode()))
 
     if (outformat == "readable") or (outformat == "StringIO"):
         return StringIO(postResponse.content.decode())
@@ -185,8 +185,8 @@ def submitJob(sql, context="MyDB"):
 
         putResponse = requests.put(QueryUrl, data=data, headers=headers)
         if putResponse.status_code != 200:
-            raise Exception("Error when submitting a job. Http Response from CasJobs API \
-                returned status code {0}:\n {1}".format(putResponse.status_code, putResponse.content.decode()))
+            raise Exception("Error when submitting a job. Http Response from CasJobs API "
+                            "returned status code {0}:\n {1}".format(putResponse.status_code, putResponse.content.decode()))
 
         return int(putResponse.content.decode())
     else:
@@ -216,8 +216,9 @@ def getJobStatus(jobId):
 
         postResponse = requests.get(QueryUrl, headers=headers)
         if postResponse.status_code != 200:
-            raise Exception("Error when getting the status of job {0}. \
-                Http Response from CasJobs API returned status code {1}:\n {2}".format(jobId, postResponse.status_code, postResponse.content.decode()))
+            raise Exception("Error when getting the status of job {0}. "
+                            "Http Response from CasJobs API returned status"
+                            "code {1}:\n {2}".format(jobId, postResponse.status_code, postResponse.content.decode()))
 
         return json.loads(postResponse.content.decode())
     else:
@@ -245,8 +246,9 @@ def cancelJob(jobId):
 
         response = requests.delete(QueryUrl, headers=headers)
         if response.status_code != 200:
-            raise Exception("Error when canceling job {0}. \
-                Http Response from CasJobs API returned status code {1}:\n {2}".format(jobId, response.status_code, response.content.decode()))
+            raise Exception("Error when canceling job {0}. "
+                            "Http Response from CasJobs API returned status code {1}:"
+                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
 
         return True  # json.loads(response.content)
     else:
@@ -430,8 +432,9 @@ def uploadCSVDataToTable(csvData, tableName, context="MyDB"):
 
         postResponse = requests.post(tablesUrl, data=csvData, headers=headers, stream=True)
         if postResponse.status_code != 200:
-            raise Exception("Error when uploading CSV data into CasJobs table {0}. \
-                Http Response from CasJobs API returned status code {1}:\n {2}".format(tableName, postResponse.status_code, postResponse.content.decode()))
+            raise Exception("Error when uploading CSV data into CasJobs table {0}. "
+                            "Http Response from CasJobs API returned status code {1}:"
+                            "\n {2}".format(tableName, postResponse.status_code, postResponse.content.decode()))
         return True
     else:
         raise Exception("User token is not defined. First log into SciServer.")

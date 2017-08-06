@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:29:22
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:01:31
+# @Last Modified time: 2017-08-06 17:24:07
 
 from __future__ import print_function, division, absolute_import
 import warnings
@@ -21,8 +21,8 @@ class KeystoneUser(object):
 
     The class KeystoneUser stores the 'id' and 'name' of the user.
     """
-    warnings.warn("Using SciServer.LoginPortal.KeystoneUser is deprecated. \
-        Use auth.KeystoneUser instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.KeystoneUser is deprecated. "
+                  "Use auth.KeystoneUser instead.", DeprecationWarning, stacklevel=2)
     id = "KeystoneID"
     userName = "User Name"
 
@@ -40,8 +40,8 @@ def getKeystoneUserWithToken(token):
 
     .. seealso:: Authentication.getToken, Authentication.login, Authentication.setToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneUserWithToken is deprecated. \
-        Use auth.getKeystoneUserWithToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneUserWithToken is deprecated. "
+                  "Use auth.getKeystoneUserWithToken instead.", DeprecationWarning, stacklevel=2)
     return auth.getKeystoneUserWithToken(token)
 
 
@@ -65,8 +65,8 @@ def login(UserName, Password):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.getToken, Authentication.setToken, Authentication.token.
     """
-    warnings.warn("Using SciServer.LoginPortal.login is deprecated. \
-        Use auth.login instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.login is deprecated."
+                  "Use auth.login instead.", DeprecationWarning, stacklevel=2)
     return auth.login(UserName, Password)
 
 
@@ -84,8 +84,8 @@ def getToken():
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token.
 
     """
-    warnings.warn("Using SciServer.LoginPortal.getToken is deprecated. \
-        Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.getToken is deprecated. "
+                  "Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
     return auth.getToken()
 
 
@@ -100,8 +100,8 @@ def identArgIdentifier():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
     """
-    warnings.warn("Using auth.identArgIdentifier is deprecated. \
-        Use auth.identArgIdentifier instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using auth.identArgIdentifier is deprecated. "
+                  "Use auth.identArgIdentifier instead.", DeprecationWarning, stacklevel=2)
     return auth.identArgIdentifier()
 
 
@@ -116,8 +116,8 @@ def getKeystoneToken():
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. \
-        Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. "
+                  "Use auth.getToken instead.", DeprecationWarning, stacklevel=2)
     return auth.getKeystoneToken()
 
 
@@ -132,7 +132,7 @@ def setKeystoneToken(token):
 
     .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
     """
-    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. \
-        Use auth.setToken instead.", DeprecationWarning, stacklevel=2)
+    warnings.warn("Using SciServer.LoginPortal.getKeystoneToken is deprecated. "
+                  "Use auth.setToken instead.", DeprecationWarning, stacklevel=2)
     auth.setKeystoneToken(token)
 

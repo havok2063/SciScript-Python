@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 16:01:56
+# @Last Modified time: 2017-08-06 17:25:41
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -38,8 +38,9 @@ def createContainer(path):
         headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
         res = requests.put(url, data=data, headers=headers)
         if res.status_code < 200 or res.status_code >= 300:
-            raise Exception("Error when creating SciDrive container at {0}.\
-                Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+            raise Exception("Error when creating SciDrive container at {0}."
+                            "Http Response from SciDrive API returned status code {1}:"
+                            "\n {2}".format(path, res.status_code, res.content.decode()))
         return True
     else:
         raise Exception("User token is not defined. First log into SciServer.")
@@ -70,11 +71,13 @@ def upload(path, data="", localFilePath=""):
 
         if res.status_code != 200:
             if (localFilePath is not None):
-                raise Exception("Error when uploading local file {0} to SciDrive path {1}. \
-                    Http Response from SciDrive API returned status code {2}:\n {3}".format(localFilePath, path, res.status_code, res.content.decode()))
+                raise Exception("Error when uploading local file {0} to SciDrive path {1}."
+                                "Http Response from SciDrive API returned status code {2}:"
+                                "\n {3}".format(localFilePath, path, res.status_code, res.content.decode()))
             else:
-                raise Exception("Error when uploading data to SciDrive path {0}. \
-                    Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+                raise Exception("Error when uploading data to SciDrive path {0}."
+                                "Http Response from SciDrive API returned status code {1}:"
+                                "\n {2}".format(path, res.status_code, res.content.decode()))
 
         return json.loads(res.content.decode())
     else:
@@ -99,8 +102,9 @@ def publicUrl(path):
         headers = {'X-Auth-Token': token}
         res = requests.get(url, headers=headers)
         if res.status_code != 200:
-            raise Exception("Error when getting the public URL of SciDrive file {0}. \
-                Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+            raise Exception("Error when getting the public URL of SciDrive file {0}. "
+                            "Http Response from SciDrive API returned status code {1}:"
+                            "\n {2}".format(path, res.status_code, res.content.decode()))
         jsonRes = json.loads(res.content.decode())
         fileUrl = jsonRes["url"]
         return (fileUrl)
@@ -127,8 +131,9 @@ def directoryList(path=""):
         headers = {'X-Auth-Token': token}
         res = requests.get(url, headers=headers)
         if res.status_code != 200:
-            raise Exception("Error when getting the public URL of SciDrive file {0}. \
-                Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+            raise Exception("Error when getting the public URL of SciDrive file {0}. "
+                            "Http Response from SciDrive API returned status code {1}:"
+                            "\n {2}".format(path, res.status_code, res.content.decode()))
 
         jsonRes = json.loads(res.content.decode())
         return (jsonRes)
@@ -156,8 +161,9 @@ def download(path, outformat="text", localFilePath=""):
         fileUrl = publicUrl(path)
         res = requests.get(fileUrl, stream=True)
         if res.status_code != 200:
-            raise Exception("Error when downloading SciDrive file {0}. \
-                Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+            raise Exception("Error when downloading SciDrive file {0}. "
+                            "Http Response from SciDrive API returned status code {1}:"
+                            "\n {2}".format(path, res.status_code, res.content.decode()))
 
         if localFilePath is not None and localFilePath != "":
 
@@ -210,8 +216,9 @@ def delete(path):
         headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
         res = requests.delete(url, data=data, headers=headers)
         if res.status_code < 200 or res.status_code >= 300:
-            raise Exception("Error when deleting {0} in SciDrive.\
-                Http Response from SciDrive API returned status code {1}:\n {2}".format(path, res.status_code, res.content.decode()))
+            raise Exception("Error when deleting {0} in SciDrive."
+                            "Http Response from SciDrive API returned status code {1}:"
+                            "\n {2}".format(path, res.status_code, res.content.decode()))
         return True
     else:
         raise Exception("User token is not defined. First log into SciServer.")
