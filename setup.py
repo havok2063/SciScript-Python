@@ -6,11 +6,15 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:25:03
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 14:36:08
+# @Last Modified time: 2017-08-07 16:34:44
 
 from __future__ import print_function, division, absolute_import
 from setuptools import setup, find_packages
+import os
 
+requirements_file = os.path.join(os.path.dirname(__file__), 'requirements.txt')
+install_requires = [line.strip().replace('==', '>=') for line in open(requirements_file)
+                    if not line.strip().startswith('#') and line.strip() != '']
 
 NAME = 'sciserver'
 VERSION = '1.10.2'
@@ -25,6 +29,7 @@ setup(
     url='https://github.com/havok2063/SciScript-Python',
     packages=find_packages(where='python'),
     package_dir={'': 'python'},
+    install_requires=install_requires,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: MacOS X',

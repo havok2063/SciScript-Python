@@ -43,13 +43,11 @@ There are 2 possibilities: automatic or manual installation.
 
 ### b) Manual Installation:
 
-3.b.1.- To install python 2 code, run `python setup.py install` while in the `./py2` directory.
-
-3.b.2.- To install python 3 code, run `python3 setup.py install` while in the `./py3` directory.
+3.b.1.- To install python code, run `python setup.py install` from the top level directory.
 
 ## 4) Creating HTML documentation:
 
-4.1.- Run `make html` while in the `./docs_sphinx/` directory. The html files will be created in `./docs_sphinx/_build/`
+4.1.- Run `make html` while in the `docs/sphinx/` directory. The html files will be created in `docs/sphinx/_build/`
 
 ## 5) Unit Tests:
 
