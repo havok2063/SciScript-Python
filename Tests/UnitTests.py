@@ -9,6 +9,11 @@ from io import StringIO
 from io import BytesIO
 import skimage
 
+'''
+These tests are now deprecated in favor of the new tests located in sciserver/tests.  To run those tests,
+cd into the sciserver/tests directory and run pytest.  (Uses the pytest python package)
+'''
+
 # Define login Name and password before running the tests:
 Authentication_loginName = '***';
 Authentication_loginPassword = '***'
