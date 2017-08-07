@@ -6,17 +6,17 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 22:14:05
+# @Last Modified time: 2017-08-07 13:27:57
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
 from sciserver import config, authentication
-from sciserver.utils import checkAuth
+from sciserver.utils import checkAuth, send_request
 import requests as requests
 import json
 
 
-@checkAuth()
+@checkAuth
 def createContainer(path):
     """
     Creates a container (directory) in SciDrive
@@ -29,7 +29,7 @@ def createContainer(path):
 
     .. seealso:: SciDrive.upload.
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     # if token is not None and token != "":
     containerBody = ('<vos:node xmlns:xsi="http://www.w3.org/2001/thisSchema-instance" '
                      'xsi:type="vos:ContainerNode" xmlns:vos="http://www.ivoa.net/xml/VOSpace/v2.0" '
@@ -38,18 +38,24 @@ def createContainer(path):
                      '</vos:node>'.format(config.SciDriveHost, path))
     url = '{0}/vospace-2.0/nodes/{1}'.format(config.SciDriveHost, path)
     data = str.encode(containerBody)
-    headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
-    res = requests.put(url, data=data, headers=headers)
-    if res.status_code < 200 or res.status_code >= 300:
-        raise Exception("Error when creating SciDrive container at {0}."
-                        "Http Response from SciDrive API returned status code {1}:"
-                        "\n {2}".format(path, res.status_code, res.content.decode()))
-    return True
+    # headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
+
+    # res = requests.put(url, data=data, headers=headers)
+    # if res.status_code < 200 or res.status_code >= 300:
+    #     raise Exception("Error when creating SciDrive container at {0}."
+    #                     "Http Response from SciDrive API returned status code {1}:"
+    #                     "\n {2}".format(path, res.status_code, res.content.decode()))
+
+    response = send_request(url, reqtype='put', data=data, content_type='application/xml',
+                            errmsg='Error when creating SciDrive container at {0}'.format(path))
+
+    if response.ok:
+        return True
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
 
 
-@checkAuth()
+@checkAuth
 def upload(path, data="", localFilePath=""):
     """
     Uploads data or a local file into a SciDrive directory.
@@ -63,32 +69,42 @@ def upload(path, data="", localFilePath=""):
 
     .. seealso:: SciDrive.createContainer
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     #if token is not None and token != "":
     url = config.SciDriveHost + '/vospace-2.0/1/files_put/dropbox/' + path
-    headers = {'X-Auth-Token': token}
-    if(localFilePath != ""):
-        with open(localFilePath, "rb") as file:
-            res = requests.put(url, data=file, headers=headers, stream=True)
+    # headers = {'X-Auth-Token': token}
+    # if(localFilePath != ""):
+    #     with open(localFilePath, "rb") as file:
+    #         res = requests.put(url, data=file, headers=headers, stream=True)
+    # else:
+    #     res = requests.put(url, data=data, headers=headers, stream=True)
+
+    # if res.status_code != 200:
+    #     if (localFilePath is not None):
+    #         raise Exception("Error when uploading local file {0} to SciDrive path {1}."
+    #                         "Http Response from SciDrive API returned status code {2}:"
+    #                         "\n {3}".format(localFilePath, path, res.status_code, res.content.decode()))
+    #     else:
+    #         raise Exception("Error when uploading data to SciDrive path {0}."
+    #                         "Http Response from SciDrive API returned status code {1}:"
+    #                         "\n {2}".format(path, res.status_code, res.content.decode()))
+
+    if localFilePath:
+        with open(localFilePath, 'rb') as file:
+            data = file
+        errmsg = 'Error when uploading local file {0} to SciDrive path {1}'.format(localFilePath, path)
     else:
-        res = requests.put(url, data=data, headers=headers, stream=True)
+        data = data
+        errmsg = 'Error when uploading data to SciDrive path {0}'.format(path)
 
-    if res.status_code != 200:
-        if (localFilePath is not None):
-            raise Exception("Error when uploading local file {0} to SciDrive path {1}."
-                            "Http Response from SciDrive API returned status code {2}:"
-                            "\n {3}".format(localFilePath, path, res.status_code, res.content.decode()))
-        else:
-            raise Exception("Error when uploading data to SciDrive path {0}."
-                            "Http Response from SciDrive API returned status code {1}:"
-                            "\n {2}".format(path, res.status_code, res.content.decode()))
-
-    return json.loads(res.content.decode())
+    response = send_request(url, reqtype='put', data=data, stream=True, errmsg=errmsg)
+    if response.ok:
+        return json.loads(response.content.decode())
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
 
 
-@checkAuth()
+@checkAuth
 def publicUrl(path):
     """
     Gets the public URL of a file (or directory) in SciDrive.
@@ -100,25 +116,28 @@ def publicUrl(path):
 
     .. seealso:: SciDrive.upload
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     #if token is not None and token != "":
 
     url = '{0}/vospace-2.0/1/media/sandbox/{1}'.format(config.SciDriveHost, path)
-    headers = {'X-Auth-Token': token}
-    res = requests.get(url, headers=headers)
-    if res.status_code != 200:
-        raise Exception("Error when getting the public URL of SciDrive file {0}. "
-                        "Http Response from SciDrive API returned status code {1}:"
-                        "\n {2}".format(path, res.status_code, res.content.decode()))
-    jsonRes = json.loads(res.content.decode())
-    fileUrl = jsonRes["url"]
-    return (fileUrl)
+    # headers = {'X-Auth-Token': token}
+    # res = requests.get(url, headers=headers)
+    # if res.status_code != 200:
+    #     raise Exception("Error when getting the public URL of SciDrive file {0}. "
+    #                     "Http Response from SciDrive API returned status code {1}:"
+    #                     "\n {2}".format(path, res.status_code, res.content.decode()))
+
+    response = send_request(url, errmsg='Error when getting the public URL of SciDrive file {0}'.format(path))
+    if response.ok:
+        jsonRes = json.loads(response.content.decode())
+        fileUrl = jsonRes["url"]
+        return fileUrl
 
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
 
 
-@checkAuth()
+@checkAuth
 def directoryList(path=""):
     """
     Gets the contents and metadata of a SciDrive directory (or file).
@@ -130,25 +149,27 @@ def directoryList(path=""):
 
     .. seealso:: SciDrive.upload, SciDrive.download
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     #if token is not None and token != "":
 
     url = "{0}/vospace-2.0/1/metadata/sandbox/{1}?list=True&path={1}".format(config.SciDriveHost, path)
-    headers = {'X-Auth-Token': token}
-    res = requests.get(url, headers=headers)
-    if res.status_code != 200:
-        raise Exception("Error when getting the public URL of SciDrive file {0}. "
-                        "Http Response from SciDrive API returned status code {1}:"
-                        "\n {2}".format(path, res.status_code, res.content.decode()))
+    # headers = {'X-Auth-Token': token}
+    # res = requests.get(url, headers=headers)
+    # if res.status_code != 200:
+    #     raise Exception("Error when getting the public URL of SciDrive file {0}. "
+    #                     "Http Response from SciDrive API returned status code {1}:"
+    #                     "\n {2}".format(path, res.status_code, res.content.decode()))
 
-    jsonRes = json.loads(res.content.decode())
-    return (jsonRes)
+    response = send_request(url, errmsg='Error when getting the public URL of SciDrive file {0}'.format(path))
+    if response.ok:
+        jsonRes = json.loads(response.content.decode())
+        return jsonRes
 
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
 
 
-@checkAuth()
+@checkAuth
 def download(path, outformat="text", localFilePath=""):
     """
     Downloads a file (directory) from SciDrive into the local file system, or returns the file conetent as an object in several formats.
@@ -162,45 +183,46 @@ def download(path, outformat="text", localFilePath=""):
 
     .. seealso:: SciDrive.upload
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     #if token is not None and token != "":
 
     fileUrl = publicUrl(path)
-    res = requests.get(fileUrl, stream=True)
-    if res.status_code != 200:
-        raise Exception("Error when downloading SciDrive file {0}. "
-                        "Http Response from SciDrive API returned status code {1}:"
-                        "\n {2}".format(path, res.status_code, res.content.decode()))
+    # res = requests.get(fileUrl, stream=True)
+    # if res.status_code != 200:
+    #     raise Exception("Error when downloading SciDrive file {0}. "
+    #                     "Http Response from SciDrive API returned status code {1}:"
+    #                     "\n {2}".format(path, res.status_code, res.content.decode()))
 
-    if localFilePath is not None and localFilePath != "":
+    response = send_request(fileUrl, stream=True,
+                            errmsg='Error when downloading SciDrive file {0}'.format(path))
 
-        bytesio = BytesIO(res.content)
-        theFile = open(localFilePath, "w+b")
-        theFile.write(bytesio.read())
-        theFile.close()
-        return True
-
-    else:
-
-        if outformat is not None and outformat != "":
-            if outformat == "StringIO":
-                return StringIO(res.content.decode())
-            if outformat == "text":
-                return res.content.decode()
-            elif outformat == "BytesIO":
-                return BytesIO(res.content)
-            elif outformat == "response":
-                return res
-            else:
-                raise Exception("Unknown format {0} when trying to download SciDrive file {1}.".format(outformat, path))
+    if response.ok:
+        if localFilePath is not None and localFilePath != "":
+            bytesio = BytesIO(response.content)
+            theFile = open(localFilePath, "w+b")
+            theFile.write(bytesio.read())
+            theFile.close()
+            return True
         else:
-            raise Exception("Wrong format parameter value")
+            if outformat is not None and outformat != "":
+                if outformat == "StringIO":
+                    return StringIO(response.content.decode())
+                elif outformat == "text":
+                    return response.content.decode()
+                elif outformat == "BytesIO":
+                    return BytesIO(response.content)
+                elif outformat == "response":
+                    return response
+                else:
+                    raise Exception("Unknown format {0} when trying to download SciDrive file {1}.".format(outformat, path))
+            else:
+                raise Exception("Wrong format parameter value")
 
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
 
 
-@checkAuth()
+@checkAuth
 def delete(path):
     """
     Deletes a file or container (directory) in SciDrive.
@@ -212,7 +234,7 @@ def delete(path):
 
     .. seealso:: SciDrive.upload.
     """
-    token = authentication.getToken()
+    #token = authentication.getToken()
     #if token is not None and token != "":
     containerBody = ('<vos:node xmlns:xsi="http://www.w3.org/2001/thisSchema-instance" '
                      'xsi:type="vos:ContainerNode" xmlns:vos="http://www.ivoa.net/xml/VOSpace/v2.0" '
@@ -221,12 +243,16 @@ def delete(path):
                      '</vos:node>'.format(config.SciDriveHost, path))
     url = config.SciDriveHost + '/vospace-2.0/nodes/' + path
     data = str.encode(containerBody)
-    headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
-    res = requests.delete(url, data=data, headers=headers)
-    if res.status_code < 200 or res.status_code >= 300:
-        raise Exception("Error when deleting {0} in SciDrive."
-                        "Http Response from SciDrive API returned status code {1}:"
-                        "\n {2}".format(path, res.status_code, res.content.decode()))
-    return True
+    # headers = {'X-Auth-Token': token, 'Content-Type': 'application/xml'}
+    # res = requests.delete(url, data=data, headers=headers)
+    # if res.status_code < 200 or res.status_code >= 300:
+    #     raise Exception("Error when deleting {0} in SciDrive."
+    #                     "Http Response from SciDrive API returned status code {1}:"
+    #                     "\n {2}".format(path, res.status_code, res.content.decode()))
+
+    response = send_request(url, reqtype='delete', data=data, content_type='application/xml',
+                            errmsg='Error when deleting {0} in SciDrive'.format(path))
+    if response.ok:
+        return True
     # else:
     #     raise Exception("User token is not defined. First log into SciServer.")
