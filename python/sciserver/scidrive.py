@@ -6,12 +6,13 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 17:25:41
+# @Last Modified time: 2017-08-06 19:14:28
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
 from sciserver import config, authentication
 import requests as requests
+import json
 
 
 def createContainer(path):

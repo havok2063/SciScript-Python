@@ -6,7 +6,82 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-04 14:23:07
+# @Last Modified time: 2017-08-06 19:37:14
 
 from __future__ import print_function, division, absolute_import
+import os
+
+__version__ = "v1.10.2"  # sciserver release version
+
+
+class SciServerConfig(object):
+    ''' Global configuration for SciServer
+
+        The SciServer.Config module contains important parameters for the correct functioning of the
+        SciServer package.
+
+        Although these parameters must be set/defined by the admin or user before the installation of the
+        package, they can also be accessed and changed on-the-fly while on the python session.
+
+        - **Config.CasJobsRESTUri**: defines the base URL of the CasJobs web API (string).
+          E.g., "https://skyserver.sdss.org/CasJobs/RestApi"
+
+        - **Config.AuthenticationURL**: defines the base URL of the Authentication web service API (string).
+          E.g., "https://portal.sciserver.org/login-portal/keystone/v3/tokens"
+
+        - **Config.SciDriveHost**: defines the base URL of the SciDrive web service API (string).
+          E.g., "https://www.scidrive.org"
+
+        - **Config.SkyQueryUrl**: defines the base URL of the SkyQuery web service API (string).
+          E.g., "http://voservices.net/skyquery/Api/V1"
+
+        - **Config.SkyServerWSurl**: defines the base URL of the SkyServer web service API (string).
+          E.g., "https://skyserver.sdss.org"
+
+        - **Config.DataRelease**: defines the SDSS data release (string), to be used to build the full
+          SkyServer API url along with Config.SkyServerWSurl.
+          E.g., "DR13"
+
+        - **Config.KeystoneTokenPath**: defines the local path (string) to the file containing the
+          user's authentication token in the SciServer-Compute environment.
+          E.g., "/home/idies/keystone.token". Unlikely to change since it is hardcoded in SciServer-Compute.
+
+        - **Config.version**: defines the SciServer release version tag (string), to which this
+          package belongs.
+          E.g., "sciserver-v1.9.3"
+
+    '''
+
+    def __init__(self):
+        ''' Initialize the config '''
+        self.set_paths()
+        self.version = __version__
+
+    def set_paths(self):
+        ''' Sets the initial paths for SciServer routes '''
+
+        # URLs for accessing SciServer web services (API endpoints)
+        self.CasJobsRESTUri = "https://skyserver.sdss.org/CasJobs/RestApi"
+        self.AuthenticationURL = "https://portal.sciserver.org/login-portal/keystone/v3/tokens"
+        self.SciDriveHost = "https://www.scidrive.org"
+        self.SkyQueryUrl = "http://voservices.net/skyquery/Api/V1"
+        self.SkyServerWSurl = "https://skyserver.sdss.org"
+        self.DataRelease = "DR13"
+
+        # this path to the file containing the user's keystone token is hardcoded in the sciserver-compute environment
+        self.KeystoneTokenPath = "/home/idies/keystone.token"
+
+    def isSciServerComputeEnvironment(self):
+        """
+        Checks whether the library is being run within the SciServer-Compute environment.
+
+        Returns:
+            iscompute (bool):
+                True if the library is being run within the SciServer-Compute environment, and False if not.
+        """
+        return os.path.isfile(self.KeystoneTokenPath)
+
+
+# create the config object
+config = SciServerConfig()
 

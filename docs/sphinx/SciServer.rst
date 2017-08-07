@@ -1,63 +1,63 @@
 SciServer package
 =================
 
-.. automodule:: SciServer
+.. automodule:: sciserver
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.CasJobs module
+sciserver.casjobs module
 ------------------------
 
-.. automodule:: SciServer.CasJobs
+.. automodule:: sciserver.casjobs
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.Config module
+sciserver.config module
 ------------------------
 
-.. automodule:: SciServer.Config
+.. automodule:: sciserver.config
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.Authentication module
+sciserver.authentication module
 ------------------------
 
-.. automodule:: SciServer.Authentication
+.. automodule:: sciserver.authentication
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.LoginPortal module
+sciserver.loginportal module
 ------------------------
 
-.. automodule:: SciServer.LoginPortal
+.. automodule:: sciserver.loginportal
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.SciDrive module
+sciserver.scidrive module
 ------------------------
 
-.. automodule:: SciServer.SciDrive
+.. automodule:: sciserver.scidrive
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.SkyServer module
+sciserver.skyserver module
 ------------------------
 
-.. automodule:: SciServer.SkyServer
+.. automodule:: sciserver.skyserver
     :members:
     :undoc-members:
     :show-inheritance:
 
-SciServer.SkyQuery module
+sciserver.skyquery module
 ------------------------
 
-.. automodule:: SciServer.SkyQuery
+.. automodule:: sciserver.skyquery
     :members:
     :undoc-members:
     :show-inheritance:
