@@ -6,15 +6,14 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:25:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 19:10:21
+# @Last Modified time: 2017-08-07 10:24:41
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
-import requests
 import pandas
 import skimage.io
-from sciserver import authentication, config
-from sciserver.exceptions import SciServerError, SciServerAPIError
+from sciserver import config
+from sciserver.utils import send_request
 
 
 def get_url(base, data_release=None):
@@ -84,41 +83,6 @@ def pad_url(url, **kwargs):
     return url
 
 
-def check_response(response, errmsg='Error'):
-    ''' Checks the response '''
-
-    try:
-        isbad = response.raise_for_status()
-    except requests.HTTPError as http:
-        err = response.content.decode()
-        raise SciServerAPIError('{0}\n {1}: {2}'.format(http, errmsg, err))
-    else:
-        assert isbad is None, 'Http status code should not be bad'
-        assert response.ok is True, 'Ok status should be true'
-        return response
-
-
-def send_request(url, acceptHeader='text/plain', errmsg='Error'):
-    ''' Sends a request to the server '''
-
-    # make a headers object
-    headers = {'Content-Type': 'application/json', 'Accept': acceptHeader}
-
-    # check for auth token
-    token = authentication.getToken()
-    if token is not None and token != "":
-        headers['X-Auth-Token'] = token
-
-    # send the request
-    try:
-        response = requests.get(url, headers=headers, stream=True)
-    except Exception as e:
-        raise SciServerError("A requests error occurred attempting to send: {0}".format(e))
-    else:
-        resp = check_response(response, errmsg=errmsg)
-        return resp
-
-
 def sqlSearch(sql, dataRelease=None):
     """
     Executes a SQL query to the SDSS database, and retrieves the result table as a dataframe. Maximum number of rows retrieved is set currently to 500,000.
@@ -136,7 +100,7 @@ def sqlSearch(sql, dataRelease=None):
 
     url = pad_url(url, format='csv', cmd=sql, taskname='sqlSearch')
 
-    response = send_request(url, errmsg='Error when executing a sql query.')
+    response = send_request(url, errmsg='Error when executing a sql query.', stream=True)
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
 
@@ -185,7 +149,7 @@ def getJpegImgCutout(ra, dec, scale=0.7, width=512, height=512, opt="", query=""
     url = pad_url(url, ra=ra, dec=dec, scale=scale, width=width, height=height,
                   opt=opt, query=query, taskname='getJpegImgCutout')
 
-    response = send_request(url, errmsg='Error when getting an image cutout.')
+    response = send_request(url, errmsg='Error when getting an image cutout.', stream=True)
     return skimage.io.imread(BytesIO(response.content))
 
 
@@ -212,7 +176,7 @@ def radialSearch(ra, dec, radius=1, coordType="equatorial", whichPhotometry="opt
     url = pad_url(url, format='csv', ra=ra, dec=dec, radius=radius, coordType=coordType,
                   whichPhotometry=whichPhotometry, limit=limit, taskname='radialSearch')
 
-    response = send_request(url, errmsg='Error when executing a radial search.')
+    response = send_request(url, errmsg='Error when executing a radial search.', stream=True)
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
 
@@ -242,7 +206,7 @@ def rectangularSearch(min_ra, max_ra, min_dec, max_dec, coordType="equatorial", 
     url = pad_url(url, format='csv', min_ra=min_ra, max_ra=max_ra, min_dec=min_dec, coordType=coordType,
                   max_dec=max_dec, whichPhotometry=whichPhotometry, limit=limit, taskname='rectangularSearch')
 
-    response = send_request(url, errmsg='Error when executing a rectangular search.')
+    response = send_request(url, errmsg='Error when executing a rectangular search.', stream=True)
     r = response.content.decode()
     return pandas.read_csv(StringIO(r), comment='#', index_col=None)
 
@@ -281,6 +245,6 @@ def objectSearch(objId=None, specObjId=None, apogee_id=None, apstar_id=None, ra=
                   ra=ra, dec=dec, plate=plate, mjd=mjd, fiber=fiber, run=run, rerun=rerun, camcol=camcol,
                   field=field, obj=obj, taskname='objectSearch')
 
-    response = send_request(url, errmsg='Error when doing an object search.')
+    response = send_request(url, errmsg='Error when doing an object search.', stream=True)
     r = response.json()
     return r
