@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 17:23:00
+# @Last Modified time: 2017-08-06 22:26:32
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -15,8 +15,10 @@ import time
 import requests as requests
 import pandas
 from sciserver import authentication, config
+from sciserver.utils import checkAuth
 
 
+@checkAuth()
 def getSchemaName():
     """
     Returns the WebServiceID that identifies the schema for a user in MyScratch database with CasJobs.
@@ -29,22 +31,23 @@ def getSchemaName():
     .. seealso:: CasJobs.getTables.
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        keystoneUserId = authentication.getKeystoneUserWithToken(token).id
-        usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
-        headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
-        getResponse = requests.get(usersUrl, headers=headers)
-        if getResponse.status_code != 200:
-            raise Exception("Error when getting schema name. Http Response from CasJobs API "
-                            "returned status code {0}: \n{1}".format(getResponse.status_code, getResponse.content.decode()))
+    keystoneUserId = authentication.getKeystoneUserWithToken(token).id
+    usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
+    headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    getResponse = requests.get(usersUrl, headers=headers)
+    if getResponse.status_code != 200:
+        raise Exception("Error when getting schema name. Http Response from CasJobs API "
+                        "returned status code {0}: \n{1}".format(getResponse.status_code, getResponse.content.decode()))
 
-        jsonResponse = json.loads(getResponse.content.decode())
-        return "wsid_" + str(jsonResponse["WebServicesId"])
-    else:
-        raise Exception("User token is not defined. First log into SciServer.")
+    jsonResponse = json.loads(getResponse.content.decode())
+    return "wsid_" + str(jsonResponse["WebServicesId"])
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
+@checkAuth()
 def getTables(context="MyDB"):
     """
     Gets the names, size and creation date of all tables in a database context that the user
@@ -59,24 +62,24 @@ def getTables(context="MyDB"):
     """
 
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
+    TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
 
-        headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
 
-        getResponse = requests.get(TablesUrl, headers=headers)
+    getResponse = requests.get(TablesUrl, headers=headers)
 
-        if getResponse.status_code != 200:
-            raise Exception("Error when getting table description from database "
-                            "context {0}. \nHttp Response from CasJobs API returned status "
-                            "code {1}: \n{2}".format(context, getResponse.status_code, getResponse.content.decode()))
+    if getResponse.status_code != 200:
+        raise Exception("Error when getting table description from database "
+                        "context {0}. \nHttp Response from CasJobs API returned status "
+                        "code {1}: \n{2}".format(context, getResponse.status_code, getResponse.content.decode()))
 
-        jsonResponse = json.loads(getResponse.content.decode())
+    jsonResponse = json.loads(getResponse.content.decode())
 
-        return jsonResponse
-    else:
-        raise Exception("User token is not defined. First log into SciServer.")
+    return jsonResponse
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def executeQuery(sql, context="MyDB", outformat="pandas"):
@@ -153,6 +156,7 @@ def executeQuery(sql, context="MyDB", outformat="pandas"):
         raise Exception("Error when executing query. Illegal format parameter specification: {0}".format(outformat))
 
 
+@checkAuth()
 def submitJob(sql, context="MyDB"):
     """
     Submits an asynchronous SQL query to the CasJobs queue.
@@ -166,33 +170,34 @@ def submitJob(sql, context="MyDB"):
     .. seealso:: CasJobs.executeQuery, CasJobs.getJobStatus, CasJobs.waitForJob, CasJobs.cancelJob.
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
+    QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
 
-        TaskName = ""
-        if config.isSciServerComputeEnvironment():
-            TaskName = "Compute.SciScript-Python.CasJobs.submitJob"
-        else:
-            TaskName = "SciScript-Python.CasJobs.submitJob"
-
-        query = {"Query": sql, "TaskName": TaskName}
-
-        data = json.dumps(query).encode()
-
-        headers = {'Content-Type': 'application/json', 'Accept': "text/plain"}
-        headers['X-Auth-Token'] = token
-
-        putResponse = requests.put(QueryUrl, data=data, headers=headers)
-        if putResponse.status_code != 200:
-            raise Exception("Error when submitting a job. Http Response from CasJobs API "
-                            "returned status code {0}:\n {1}".format(putResponse.status_code, putResponse.content.decode()))
-
-        return int(putResponse.content.decode())
+    TaskName = ""
+    if config.isSciServerComputeEnvironment():
+        TaskName = "Compute.SciScript-Python.CasJobs.submitJob"
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        TaskName = "SciScript-Python.CasJobs.submitJob"
+
+    query = {"Query": sql, "TaskName": TaskName}
+
+    data = json.dumps(query).encode()
+
+    headers = {'Content-Type': 'application/json', 'Accept': "text/plain"}
+    headers['X-Auth-Token'] = token
+
+    putResponse = requests.put(QueryUrl, data=data, headers=headers)
+    if putResponse.status_code != 200:
+        raise Exception("Error when submitting a job. Http Response from CasJobs API "
+                        "returned status code {0}:\n {1}".format(putResponse.status_code, putResponse.content.decode()))
+
+    return int(putResponse.content.decode())
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
+@checkAuth()
 def getJobStatus(jobId):
     """
     Shows the status of a job submitted to CasJobs.
@@ -208,23 +213,24 @@ def getJobStatus(jobId):
     .. seealso:: CasJobs.submitJob, CasJobs.waitForJob, CasJobs.cancelJob.
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+    QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
 
-        headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
 
-        postResponse = requests.get(QueryUrl, headers=headers)
-        if postResponse.status_code != 200:
-            raise Exception("Error when getting the status of job {0}. "
-                            "Http Response from CasJobs API returned status"
-                            "code {1}:\n {2}".format(jobId, postResponse.status_code, postResponse.content.decode()))
+    postResponse = requests.get(QueryUrl, headers=headers)
+    if postResponse.status_code != 200:
+        raise Exception("Error when getting the status of job {0}. "
+                        "Http Response from CasJobs API returned status"
+                        "code {1}:\n {2}".format(jobId, postResponse.status_code, postResponse.content.decode()))
 
-        return json.loads(postResponse.content.decode())
-    else:
-        raise Exception("User token is not defined. First log into SciServer.")
+    return json.loads(postResponse.content.decode())
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
+@checkAuth()
 def cancelJob(jobId):
     """
     Cancels a job already submitted.
@@ -238,21 +244,21 @@ def cancelJob(jobId):
     .. seealso:: CasJobs.submitJob, CasJobs.waitForJob.
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+    QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
 
-        headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
+    headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
 
-        response = requests.delete(QueryUrl, headers=headers)
-        if response.status_code != 200:
-            raise Exception("Error when canceling job {0}. "
-                            "Http Response from CasJobs API returned status code {1}:"
-                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
+    response = requests.delete(QueryUrl, headers=headers)
+    if response.status_code != 200:
+        raise Exception("Error when canceling job {0}. "
+                        "Http Response from CasJobs API returned status code {1}:"
+                        "\n {2}".format(jobId, response.status_code, response.content.decode()))
 
-        return True  # json.loads(response.content)
-    else:
-        raise Exception("User token is not defined. First log into SciServer.")
+    return True  # json.loads(response.content)
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def waitForJob(jobId, verbose=True):
@@ -406,6 +412,7 @@ def uploadPandasDataFrameToTable(dataFrame, tableName, context="MyDB"):
         raise e
 
 
+@checkAuth()
 def uploadCSVDataToTable(csvData, tableName, context="MyDB"):
     """
     Uploads CSV data into a CasJobs table.
@@ -421,20 +428,20 @@ def uploadCSVDataToTable(csvData, tableName, context="MyDB"):
     .. seealso:: CasJobs.uploadPandasDataFrameToTable
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    # if token is not None and token != "":
 
-        # if (config.executeMode == "debug"):
-        #    print("Uploading ", sys.getsizeof(CVSdata), "bytes...")
-        tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName
+    # if (config.executeMode == "debug"):
+    #    print("Uploading ", sys.getsizeof(CVSdata), "bytes...")
+    tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName
 
-        headers = {}
-        headers['X-Auth-Token'] = token
+    headers = {}
+    headers['X-Auth-Token'] = token
 
-        postResponse = requests.post(tablesUrl, data=csvData, headers=headers, stream=True)
-        if postResponse.status_code != 200:
-            raise Exception("Error when uploading CSV data into CasJobs table {0}. "
-                            "Http Response from CasJobs API returned status code {1}:"
-                            "\n {2}".format(tableName, postResponse.status_code, postResponse.content.decode()))
-        return True
-    else:
-        raise Exception("User token is not defined. First log into SciServer.")
+    postResponse = requests.post(tablesUrl, data=csvData, headers=headers, stream=True)
+    if postResponse.status_code != 200:
+        raise Exception("Error when uploading CSV data into CasJobs table {0}. "
+                        "Http Response from CasJobs API returned status code {1}:"
+                        "\n {2}".format(tableName, postResponse.status_code, postResponse.content.decode()))
+    return True
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")

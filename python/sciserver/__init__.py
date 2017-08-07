@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 19:37:14
+# @Last Modified time: 2017-08-07 10:05:23
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -56,6 +56,7 @@ class SciServerConfig(object):
         ''' Initialize the config '''
         self.set_paths()
         self.version = __version__
+        self.token = None
 
     def set_paths(self):
         ''' Sets the initial paths for SciServer routes '''
@@ -80,6 +81,12 @@ class SciServerConfig(object):
                 True if the library is being run within the SciServer-Compute environment, and False if not.
         """
         return os.path.isfile(self.KeystoneTokenPath)
+
+    def get_token(self):
+        ''' Get a token '''
+        if not self.token:
+            from sciserver import authentication as auth
+            self.token = auth.get_token()
 
 
 # create the config object

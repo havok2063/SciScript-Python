@@ -6,22 +6,19 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:00:25
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 17:28:15
+# @Last Modified time: 2017-08-06 22:18:35
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO
 import json
-import sys
 import time
-import urllib
 import requests
 import pandas
 from sciserver import authentication, config
+from sciserver.utils import checkAuth
 
 
-######################################################################################################################
-# Jobs:
-
+@checkAuth()
 def getJobStatus(jobId):
     """
     Gets the status of a job, as well as other related metadata (more info in http://www.voservices.net/skyquery).
@@ -34,25 +31,26 @@ def getJobStatus(jobId):
     .. seealso:: SkyQuery.submitJob, SkyQuery.cancelJob
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
+    #if token is not None and token != "":
+    statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(statusURL, headers=headers)
+    response = requests.get(statusURL, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['queryJob'])
-        else:
-            raise Exception("Error when getting the job status of job {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['queryJob'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when getting the job status of job {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(jobId, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
+@checkAuth()
 def cancelJob(jobId):
     """
     Cancels a single job (more info in http://www.voservices.net/skyquery).
@@ -65,34 +63,35 @@ def cancelJob(jobId):
     .. seealso:: SkyQuery.submitJob, SkyQuery.getJobStatus
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    #if token is not None and token != "":
 
-        statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
+    statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.delete(statusURL, headers=headers)
+    response = requests.delete(statusURL, headers=headers)
 
-        if response.status_code == 200:
-            # r = response.json()
-            # try:
-            #     status = r['queryJob']["status"]
-            #     if status == "canceled":
-            #         return True;
-            #     else:
-            #         return False;
-            # except:
-            #     return False;
-            return True
-        else:
-            raise Exception("Error when cancelling job {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(jobId, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        # r = response.json()
+        # try:
+        #     status = r['queryJob']["status"]
+        #     if status == "canceled":
+        #         return True;
+        #     else:
+        #         return False;
+        # except:
+        #     return False;
+        return True
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when cancelling job {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(jobId, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
+@checkAuth()
 def listQueues():
     """
     Returns a list of all available job queues and related metadata (more info in http://www.voservices.net/skyquery).
@@ -104,22 +103,22 @@ def listQueues():
     .. seealso:: SkyQuery.getQueueInfo, SkyQuery.submitJob, SkyQuery.getJobStatus
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        jobsURL = '{0}/Jobs.svc/queues'.format(config.SkyQueryUrl)
+    #if token is not None and token != "":
+    jobsURL = '{0}/Jobs.svc/queues'.format(config.SkyQueryUrl)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(jobsURL, headers=headers)
+    response = requests.get(jobsURL, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['queues'])
-        else:
-            raise Exception("Error when listing queues.\nHttp Response from SkyQuery "
-                            "API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['queues'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when listing queues.\nHttp Response from SkyQuery "
+                        "API returned status code {0}:\n {1}".format(response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def getQueueInfo(queue):
@@ -134,24 +133,24 @@ def getQueueInfo(queue):
     .. seealso:: SkyQuery.listQueues, SkyQuery.submitJob, SkyQuery.getJobStatus
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    #if token is not None and token != "":
 
-        jobsURL = '{0}/Jobs.svc/queues/{1}'.format(config.SkyQueryUrl, queue)
+    jobsURL = '{0}/Jobs.svc/queues/{1}'.format(config.SkyQueryUrl, queue)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(jobsURL, headers=headers)
+    response = requests.get(jobsURL, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['queue'])
-        else:
-            raise Exception("Error when getting queue info of {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(queue, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['queue'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when getting queue info of {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(queue, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def submitJob(query, queue='quick'):
@@ -167,28 +166,28 @@ def submitJob(query, queue='quick'):
     .. seealso:: SkyQuery.getJobStatus, SkyQuery.listQueues
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    #if token is not None and token != "":
 
-        jobsURL = '{0}/Jobs.svc/queues/{1}/jobs'.format(config.SkyQueryUrl, queue)
+    jobsURL = '{0}/Jobs.svc/queues/{1}/jobs'.format(config.SkyQueryUrl, queue)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        body = {"queryJob": {"query": query}}
+    body = {"queryJob": {"query": query}}
 
-        data = json.dumps(body).encode()
+    data = json.dumps(body).encode()
 
-        response = requests.post(jobsURL, data=data, headers=headers)
+    response = requests.post(jobsURL, data=data, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['queryJob']['guid'])
-        else:
-            raise Exception("Error when submitting job on queue {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(queue, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['queryJob']['guid'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when submitting job on queue {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(queue, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def waitForJob(jobId, verbose=True):
@@ -239,23 +238,23 @@ def listJobs(queue="quick"):
     .. seealso:: SkyQuery.getJobStatus, SkyQuery.listQueues
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        jobsURL = '{0}/Jobs.svc/queues/{1}/jobs?'.format(config.SkyQueryUrl, queue)
+    #if token is not None and token != "":
+    jobsURL = '{0}/Jobs.svc/queues/{1}/jobs?'.format(config.SkyQueryUrl, queue)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(jobsURL, headers=headers)
+    response = requests.get(jobsURL, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['jobs'])
-        else:
-            raise Exception("Error when listing jobs on queue {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(queue, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['jobs'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when listing jobs on queue {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(queue, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 ######################################################################################################################
@@ -274,24 +273,24 @@ def listAllDatasets():
     """
 
     token = authentication.getToken()
-    if token is not None and token != "":
+    #if token is not None and token != "":
 
-        schemaURL = '{0}/Schema.svc/datasets'.format(config.SkyQueryUrl)
+    schemaURL = '{0}/Schema.svc/datasets'.format(config.SkyQueryUrl)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(schemaURL, headers=headers)
+    response = requests.get(schemaURL, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['datasets'])
-        else:
-            raise Exception("Error when listing all datasets. "
-                            "Http Response from SkyQuery API returned status code {0}:"
-                            "\n {1}".format(response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['datasets'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when listing all datasets. "
+                        "Http Response from SkyQuery API returned status code {0}:"
+                        "\n {1}".format(response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def getDatasetInfo(datasetName="MyDB"):
@@ -306,22 +305,22 @@ def getDatasetInfo(datasetName="MyDB"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        schemaURL = '{0}/Schema.svc/datasets/{1}'.format(config.SkyQueryUrl, datasetName)
+    #if token is not None and token != "":
+    schemaURL = '{0}/Schema.svc/datasets/{1}'.format(config.SkyQueryUrl, datasetName)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(schemaURL, headers=headers)
+    response = requests.get(schemaURL, headers=headers)
 
-        if response.status_code == 200:
-            return(response.json())
-        else:
-            raise Exception("Error when getting info from dataset {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        return(response.json())
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when getting info from dataset {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def listDatasetTables(datasetName="MyDB"):
@@ -336,23 +335,23 @@ def listDatasetTables(datasetName="MyDB"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        url = '{0}/Schema.svc/datasets/{1}/tables'.format(config.SkyQueryUrl, datasetName)
+    #if token is not None and token != "":
+    url = '{0}/Schema.svc/datasets/{1}/tables'.format(config.SkyQueryUrl, datasetName)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['tables'])
-        else:
-            raise Exception("Error when listing tables in dataset {0}. "
-                            "Http Response from SkyQuery API returned status code {1}:"
-                            "\n {2}".format(datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['tables'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when listing tables in dataset {0}. "
+                        "Http Response from SkyQuery API returned status code {1}:"
+                        "\n {2}".format(datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def getTableInfo(tableName, datasetName="MyDB"):
@@ -368,22 +367,22 @@ def getTableInfo(tableName, datasetName="MyDB"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        url = '{0}/Schema.svc/datasets/{1}/tables/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
+    #if token is not None and token != "":
+    url = '{0}/Schema.svc/datasets/{1}/tables/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers)
 
-        if response.status_code == 200:
-            return(response.json())
-        else:
-            raise Exception("Error when getting info of table {0} in dataset {1}. "
-                            "Http Response from SkyQuery API returned status code {2}:"
-                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        return(response.json())
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when getting info of table {0} in dataset {1}. "
+                        "Http Response from SkyQuery API returned status code {2}:"
+                        "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def listTableColumns(tableName, datasetName="MyDB"):
@@ -399,23 +398,23 @@ def listTableColumns(tableName, datasetName="MyDB"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.dropTable
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        url = '{0}/Schema.svc/datasets/{1}/tables/{2}/columns'.format(config.SkyQueryUrl, datasetName, tableName)
+    #if token is not None and token != "":
+    url = '{0}/Schema.svc/datasets/{1}/tables/{2}/columns'.format(config.SkyQueryUrl, datasetName, tableName)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers)
 
-        if response.status_code == 200:
-            r = response.json()
-            return(r['columns'])
-        else:
-            raise Exception("Error when listing columns of table {0} in dataset {1}. "
-                            "Http Response from SkyQuery API returned status code {2}:"
-                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        r = response.json()
+        return(r['columns'])
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when listing columns of table {0} in dataset {1}. "
+                        "Http Response from SkyQuery API returned status code {2}:"
+                        "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 ######################################################################################################################
@@ -435,25 +434,25 @@ def getTable(tableName, datasetName="MyDB", top=None):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.dropTable, SkyQuery.submitJob
     """
     token = authentication.getToken()
-    if token is not None and token != "":
+    #if token is not None and token != "":
 
-        url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
-        if top is not None and top != "":
-            url = url + '?top=' + str(top)
+    url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
+    if top is not None and top != "":
+        url = url + '?top=' + str(top)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.get(url, headers=headers, stream=True)
+    response = requests.get(url, headers=headers, stream=True)
 
-        if response.status_code == 200:
-            return(pandas.read_csv(StringIO(response.content.decode()), sep="\t"))
-        else:
-            raise Exception("Error when getting table {0} from dataset {1}. "
-                            "Http Response from SkyQuery API returned status code {2}:"
-                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        return(pandas.read_csv(StringIO(response.content.decode()), sep="\t"))
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when getting table {0} from dataset {1}. "
+                        "Http Response from SkyQuery API returned status code {2}:"
+                        "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def dropTable(tableName, datasetName="MyDB"):
@@ -469,22 +468,22 @@ def dropTable(tableName, datasetName="MyDB"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.submitJob
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
+    #if token is not None and token != "":
+    url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
 
-        headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
 
-        response = requests.delete(url, headers=headers)
+    response = requests.delete(url, headers=headers)
 
-        if response.status_code == 200:
-            return (True)
-        else:
-            raise Exception("Error when dropping table {0} in dataset {1}. "
-                            "Http Response from SkyQuery API returned status code {2}:"
-                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    if response.status_code == 200:
+        return (True)
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Error when dropping table {0} in dataset {1}. "
+                        "Http Response from SkyQuery API returned status code {2}:"
+                        "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
 def uploadTable(uploadData, tableName, datasetName="MyDB", outformat="csv"):
@@ -502,26 +501,26 @@ def uploadTable(uploadData, tableName, datasetName="MyDB", outformat="csv"):
     .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.submitJob
     """
     token = authentication.getToken()
-    if token is not None and token != "":
-        url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
-        ctype = ""
-        if outformat == "csv":
-            ctype = 'text/csv'
-        else:
-            raise Exception("Unknown format {0} when trying to upload data in SkyQuery.".format(outformat))
-
-        headers = {'Content-Type': ctype, 'Accept': 'application/json'}
-        headers['X-Auth-Token'] = token
-
-        response = requests.put(url, data=uploadData, headers=headers, stream=True)
-
-        if response.status_code == 200:
-            return (True)
-        else:
-            raise Exception("Error when uploading data to table {0} in dataset {1}. "
-                            "Http Response from SkyQuery API returned status code {2}:"
-                            "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    #if token is not None and token != "":
+    url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
+    ctype = ""
+    if outformat == "csv":
+        ctype = 'text/csv'
     else:
-        raise Exception("User token is not defined. First log into SciServer.")
+        raise Exception("Unknown format {0} when trying to upload data in SkyQuery.".format(outformat))
+
+    headers = {'Content-Type': ctype, 'Accept': 'application/json'}
+    headers['X-Auth-Token'] = token
+
+    response = requests.put(url, data=uploadData, headers=headers, stream=True)
+
+    if response.status_code == 200:
+        return (True)
+    else:
+        raise Exception("Error when uploading data to table {0} in dataset {1}. "
+                        "Http Response from SkyQuery API returned status code {2}:"
+                        "\n {3}".format(tableName, datasetName, response.status_code, response.content.decode()))
+    # else:
+    #     raise Exception("User token is not defined. First log into SciServer.")
 
 
