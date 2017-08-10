@@ -1,0 +1,12 @@
+[run]
+branch = true
+
+omit =
+    # exclude things in test
+    python/sciserver/tests/*
+    python/sciserver/extern/*
+
+[report]
+omit =
+    python/sciserver/tests/*
+    python/sciserver/extern/*
