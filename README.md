@@ -18,43 +18,36 @@ Some SciServer tools you can access with this package:
 
  * [SkyQuery](http://www.voservices.net/skyquery): Cross-match of astronomical source catalogs.
 
-Maintainer: Manuchehr Taghizadeh-Popp.
+Maintainer of this repo: Brian Cherinka.
 
-Authors: Gerard Lemson, Manuchehr Taghizadeh-Popp.
+Original Authors: Gerard Lemson, Manuchehr Taghizadeh-Popp.
 
+[Documentation](): documentation on read the docs soon!
 
-## 1) Cloning the code locally:
+Installation
+------------
 
-1.1.- Run `git clone http://github.com/sciserver/SciScript-Python.git`
+To install:
 
-## 2) Setting configuration parameters:
+    pip install sciserver
 
-2.1.- Open `./py2/SciServer/Config.py` and `./py3/SciServer/Config.py`, and edit the API URLs and parameters to match those of the SciServer tools and installation, according to the instructions and descriptions found therein.
+If you would like to contribute to SciServer's development, you can clone this git repo, pip install the dependencies, and then setup with `python setup.py install`:
 
-## 3) Installation:
+    git clone https://github.com/havok2063/SciScript-Python sciserver
+    cd sciserver
+    pip install -r requirements.txt
+    python setup.py install
 
-There are 2 possibilities: automatic or manual installation.
+Examples
+--------
 
-### a) Automatic Installation and Update:
+In the directory `examples` you can find python scripts or Jupyter notebooks that will run sample code using SciScript-Python modules and methods.
 
-3.a.1.- Run `python ShowSciServerTags.py` in order to see the version tags that label each SciServer release containing new SciScript code.
+Testing
+-------
 
-3.a.2.- To install or update, run `python Install.py tag`, where `tag` is the version tag of the SciServer release containing the SciScript version you want to install or update to (see previous step). If `tag` is not specified, then the latest version will be installed.
+To run the suite of tests:
 
-### b) Manual Installation:
+    cd sciserver/python/tests
+    pytest
 
-3.b.1.- To install python code, run `python setup.py install` from the top level directory.
-
-## 4) Creating HTML documentation:
-
-4.1.- Run `make html` while in the `docs/sphinx/` directory. The html files will be created in `docs/sphinx/_build/`
-
-## 5) Unit Tests:
-
-5.1.- Open `./Tests/UnitTests.py` and edit the `Authentication_loginName` and `Authentication_loginPassword` parameters in order to run the Tests under the credentials of a (test) user.
-
-5.2.- Run `python UnitTests.py` while in the `./Tests` directory in order to run the unit tests for the SciScript-Python modules. Be sure all that all tests end with an `OK` status.
-
-## 6) Examples.
-
-6.1.- In the directory `./Examples` you can find python scripts or Jupyter notebooks that will run sample code using SciScript-Python modules and methods.
