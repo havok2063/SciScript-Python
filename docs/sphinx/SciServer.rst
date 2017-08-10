@@ -53,3 +53,12 @@ Skyquery
     :members:
     :undoc-members:
     :show-inheritance:
+
+Utilities
+---------
+
+.. automodule:: sciserver.utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

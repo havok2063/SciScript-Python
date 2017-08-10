@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 10:23:56
+# @Last Modified time: 2017-08-10 11:45:04
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -166,6 +166,7 @@ def submitJob(sql, context="MyDB"):
 
     if response.ok:
         return int(response.content.decode())
+
 
 @checkAuth
 def getJobStatus(jobId):

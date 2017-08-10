@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 22:12:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 10:23:33
+# @Last Modified time: 2017-08-10 11:53:16
 
 from __future__ import print_function, division, absolute_import
 from functools import wraps
@@ -16,7 +16,26 @@ import requests
 
 
 def checkAuth(func):
-    '''Decorator that checks if a token has been generated'''
+    ''' Decorator that checks if a token has been generated
+
+    Function Decorator to check if a token has already been generated.
+    If not it raises an error and tells you to log in.  Otherwise it
+    returns the function and proceeds as normal.
+
+    Returns:
+        The decorated function
+
+    Raises:
+        SciServerError: User token is not defined. First log into SciServer.
+
+    Example:
+        >>>
+        >>> @checkauth
+        >>> def my_function():
+        >>>     return 'I am working function'
+        >>>
+
+    '''
 
     @wraps(func)
     def wrapper(*args, **kwargs):
@@ -29,7 +48,24 @@ def checkAuth(func):
 
 
 def check_response(response, errmsg='Error'):
-    ''' Checks the response '''
+    ''' Checks the response
+
+    Checks the response from a given request.  Raises an error
+    for any response with a non 200 status_code .
+
+    Parameters:
+        response:
+            the Python requests response object
+        errmsg (str):
+            A custom error message for the type of request being sent
+
+    Returns:
+        the HTTP response
+
+    Raises:
+        SciServerApiError: upon any HTTPError caused by a bad status code
+
+    '''
 
     try:
         isbad = response.raise_for_status()
@@ -43,7 +79,22 @@ def check_response(response, errmsg='Error'):
 
 
 def make_header(content_type='application/json', accept_header='text/plain'):
-    ''' Make a request header '''
+    ''' Makes a request header
+
+    Makes a request header to be passed along.  Includes the Content-Type,
+    Accept arguments.  Also includes an X-Auth-Token is a token is present.
+
+    Parameters:
+        content_type (str):
+            The request header Content-Type (default: application/json)
+        accept_header (str):
+            The request header Accept (default: application/json)
+
+    Returns:
+        headers (dict):
+            The dictionary to be used as a request header
+
+    '''
 
     headers = {'Content-Type': content_type, 'Accept': accept_header}
 
@@ -57,7 +108,40 @@ def make_header(content_type='application/json', accept_header='text/plain'):
 
 def send_request(url, reqtype='get', data=None, content_type='application/json',
                  acceptHeader='text/plain', errmsg='Error', stream=None):
-    ''' Sends a request to the server '''
+    ''' Sends a request to the server
+
+    Parameters:
+        url (str):
+            The url path for the request
+        reqtype (str):
+            The type of request to perform.  Default is get.  Choices are get, post, put, delete
+        data ({str|dict}):
+            Optional data to send in the request
+        content_type (str):
+            the header Content-Type argument.  Default is application/json
+        acceptHeader (str):
+            the header Accept argument. Default is text/plain
+        errmsg (str):
+            custom error message in case of faults
+        stream (bool):
+            optional.  if False, the response content will be immediately downloaded
+
+    Returns:
+        response:
+            The HTTP response object
+
+    Raises:
+        SciServerError: upon any error to occur when sending the requests
+
+    Example:
+        >>> # to send a simple get request
+        >>> response = send_request(url, errmsg='Error when executing a sql query.')
+        >>>
+        >>> # to send a post request
+        >>> response = send_request(jobsURL, reqtype='post', data=data, content_type='application/json',
+        >>>        acceptHeader='application/json', errmsg='Error when submitting job on queue')
+
+    '''
 
     headers = make_header(content_type=content_type, accept_header=acceptHeader)
 

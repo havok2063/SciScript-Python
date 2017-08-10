@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:41:52
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 08:34:27
+# @Last Modified time: 2017-08-10 11:23:37
 
 from __future__ import print_function, division, absolute_import
 import json
@@ -23,30 +23,43 @@ class KeystoneUser(object):
     """
     The class KeystoneUser stores the 'id' and 'name' of the user.
     """
-    userid = None
-    userName = None
+    def __init__(self):
+        self.userid = None
+        self.userName = None
 
 
 class Token(object):
     """
     The class token stores the authentication token of the user in a particular session.
     """
-    value = None
+    def __init__(self):
+        self.value = None
 
 
 token = Token()
 
 
 def getKeystoneUserWithToken(token):
-    """
+    """ Returns Keystone user info after login
+
     Returns the name and Keystone id of the user corresponding to the specified token.
 
-    :param token: Sciserver's authentication token (string) for the user.
-    :return: Returns a KeystoneUser object, which stores the name and id of the user.
-    :raises: Throws an exception if the HTTP request to the Authentication URL returns an error.
-    :example: token = Authentication.getKeystoneUserWithToken(Authentication.getToken())
+    Parameters:
+        token (str):
+            Sciserver's authentication token for the user.
 
-    .. seealso:: Authentication.getToken, Authentication.login, Authentication.setToken.
+    Returns:
+        an instance of the KeystoneUser object, which stores the name and id of the user.
+
+    Raises:
+        Exception: Throws an exception if the HTTP request to the Authentication URL returns an error.
+
+    Example:
+        >>> token = Authentication.getKeystoneUserWithToken(Authentication.getToken())
+
+    See Also:
+        Authentication.getToken, Authentication.login, Authentication.setToken.
+
     """
     loginURL = config.AuthenticationURL
     if ~loginURL.endswith("/"):
@@ -69,7 +82,8 @@ def getKeystoneUserWithToken(token):
 
 
 def login(UserName, Password):
-    """
+    """ Logs in a user into SciServer
+
     Logs the user into SciServer and returns the authentication token.
     This function is useful when SciScript-Python library methods are executed outside
     the SciServer-Compute environment. In this case, the session authentication token
@@ -78,13 +92,25 @@ def login(UserName, Password):
     Authentication.login also sets the token value in the python instance argument variable
     "--ident", and as the local object Authentication.token (of class Authentication.Token).
 
-    :param UserName: name of the user (string)
-    :param Password: password of the user (string)
-    :return: authentication token (string)
-    :raises: Throws an exception if the HTTP request to the Authentication URL returns an error.
-    :example: token = Authentication.login('loginName','loginPassword')
+    Parameters:
+        UserName (str):
+            name of the user
+        Password (str):
+            password of the user
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.getToken, Authentication.setToken, Authentication.token.
+    Returns:
+        token (str):
+            authentication token
+
+    Raises:
+        Exception: Throws an exception if the HTTP request to the Authentication URL returns an error.
+
+    Example:
+        >>> token = Authentication.login('loginName','loginPassword')
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.getToken, Authentication.setToken, Authentication.token.
+
     """
     loginURL = config.AuthenticationURL
 
@@ -105,17 +131,23 @@ def login(UserName, Password):
 
 
 def getToken():
-    """
+    """ Returns the authentication token of a user
+
     Returns the SciServer authentication token of the user. First, will try to
     return Authentication.token.value. If Authentication.token.value is not set,
     Authentication.getToken will try to return the token value in the python instance
     argument variable "--ident". If this variable does not exist, will try to return the token
     stored in config.KeystoneTokenFilePath. Will return a None value if all previous steps fail.
 
-    :return: authentication token (string)
-    :example: token = Authentication.getToken()
+    Returns:
+        token (str):
+            The authentication token
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token.
+    Example:
+        >>> token = Authentication.getToken()
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token.
 
     """
     try:
@@ -171,14 +203,21 @@ def getToken():
 
 
 def setToken(_token):
-    """
+    """ Sets an authentication token
+
     Sets the SciServer authentication token of the user in the variable Authentication.token.value,
     as well as in the python instance argument variable "--ident".
 
-    :param _token: Sciserver's authentication token for the user (string)
-    :example: Authentication.setToken('myToken')
+    Parameters:
+        _token (str):
+            Sciserver's authentication token for the user
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
+    Example:
+        >>> Authentication.setToken('myToken')
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
+
     """
     if _token is None:
         warnings.warn("Authentication token is being set with a None value.", Warning, stacklevel=2)
@@ -203,27 +242,41 @@ def setToken(_token):
 
 
 def identArgIdentifier():
-    """
+    """ Returns the identity name of the token location
+
     Returns the name of the python instance argument variable where the user token is stored.
 
-    :return: name (string) of the python instance argument variable where the user token is stored.
-    :example: name = Authentication.identArgIdentifier()
+    Returns:
+        name (str):
+            name of the python instance argument variable where the user token is stored.
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
+    Example:
+        >>> name = Authentication.identArgIdentifier()
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.getToken, Authentication.token.
+
     """
     return "--ident="
 
 
 def getKeystoneToken():
-    """
-    .. warning:: Deprecated. Use Authentication.getToken instead.
+    """ Returns a keystone token
 
     Returns the users keystone token passed into the python instance with the --ident argument.
 
-    :return: authentication token (string)
-    :example: token = Authentication.getKeystoneToken()
+    .. warning:: Deprecated. Use Authentication.getToken instead.
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
+    Returns:
+        token (str):
+            authentication token
+
+    Example:
+        >>> token = Authentication.getKeystoneToken()
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
+
     """
     warnings.warn("Using SciServer.Authentication.getKeystoneToken is deprecated."
                   "Use SciServer.Authentication.getToken instead.", DeprecationWarning, stacklevel=2)
@@ -243,15 +296,23 @@ def getKeystoneToken():
 
 
 def setKeystoneToken(_token):
-    """
-    .. warning:: Deprecated. Use Authentication.setToken instead.
+    """ Sets the token
 
     Sets the token as the --ident argument
 
-    :param _token: authentication token (string)
-    :example: Authentication.setKeystoneToken("myToken")
+    .. warning:: Deprecated. Use Authentication.setToken instead.
 
-    .. seealso:: Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken, Authentication.token, Authentication.getToken.
+    Parameters:
+        _token (str):
+            authentication token
+
+    Example:
+        >>> Authentication.setKeystoneToken("myToken")
+
+    See Also:
+        Authentication.getKeystoneUserWithToken, Authentication.login, Authentication.setToken,
+        Authentication.token, Authentication.getToken.
+
     """
     warnings.warn("Using SciServer.Authentication.setKeystoneToken is deprecated."
                   "Use SciServer.Authentication.setToken instead.", DeprecationWarning, stacklevel=2)
