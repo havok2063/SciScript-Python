@@ -15,6 +15,7 @@
     - reduced boilerplate code
     - added general utils
     - converted tests to pytest
+    - added to travis
 
 ### Fixed:
 

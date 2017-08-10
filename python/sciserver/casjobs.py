@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 14:09:47
+# @Last Modified time: 2017-08-10 09:36:31
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -33,7 +33,7 @@ def getSchemaName():
     #token = authentication.getToken()
     # if token is not None and token != "":
 
-    keystoneUserId = authentication.getKeystoneUserWithToken(config.token).id
+    keystoneUserId = authentication.getKeystoneUserWithToken(config.token).userid
     usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
     # headers = {'X-Auth-Token': token, 'Content-Type': 'application/json'}
     # getResponse = requests.get(usersUrl, headers=headers)

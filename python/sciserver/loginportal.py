@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:29:22
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 17:24:07
+# @Last Modified time: 2017-08-10 08:33:23
 
 from __future__ import print_function, division, absolute_import
 import warnings
@@ -23,7 +23,7 @@ class KeystoneUser(object):
     """
     warnings.warn("Using SciServer.LoginPortal.KeystoneUser is deprecated. "
                   "Use auth.KeystoneUser instead.", DeprecationWarning, stacklevel=2)
-    id = "KeystoneID"
+    userid = "KeystoneID"
     userName = "User Name"
 
 

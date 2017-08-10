@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 13:27:57
+# @Last Modified time: 2017-08-10 10:09:42
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -92,12 +92,14 @@ def upload(path, data="", localFilePath=""):
     if localFilePath:
         with open(localFilePath, 'rb') as file:
             data = file
-        errmsg = 'Error when uploading local file {0} to SciDrive path {1}'.format(localFilePath, path)
+            errmsg = 'Error when uploading local file {0} to SciDrive path {1}'.format(localFilePath, path)
+            response = send_request(url, reqtype='put', data=data, stream=True, errmsg=errmsg)
     else:
         data = data
         errmsg = 'Error when uploading data to SciDrive path {0}'.format(path)
+        response = send_request(url, reqtype='put', data=data, stream=True, errmsg=errmsg)
 
-    response = send_request(url, reqtype='put', data=data, stream=True, errmsg=errmsg)
+    #response = send_request(url, reqtype='put', data=data, stream=True, errmsg=errmsg)
     if response.ok:
         return json.loads(response.content.decode())
     # else:

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:41:52
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 17:21:12
+# @Last Modified time: 2017-08-10 08:34:27
 
 from __future__ import print_function, division, absolute_import
 import json
@@ -23,7 +23,7 @@ class KeystoneUser(object):
     """
     The class KeystoneUser stores the 'id' and 'name' of the user.
     """
-    id = None
+    userid = None
     userName = None
 
 
@@ -63,7 +63,7 @@ def getKeystoneUserWithToken(token):
 
     ksu = KeystoneUser()
     ksu.userName = responseJson["token"]["user"]["name"]
-    ksu.id = responseJson["token"]["user"]["id"]
+    ksu.userid = responseJson["token"]["user"]["id"]
 
     return ksu
 

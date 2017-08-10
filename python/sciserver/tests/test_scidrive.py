@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 13:28:13
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 13:51:03
+# @Last Modified time: 2017-08-10 10:11:56
 
 from __future__ import print_function, division, absolute_import
 from sciserver import scidrive
@@ -55,29 +55,31 @@ class TestSciDrive(object):
     def test_publicUrl(self, noscidrive):
         responseCreate = scidrive.createContainer(SciDrive_Directory)
         url = scidrive.publicUrl(SciDrive_Directory)
-        # responseDelete = scidrive.delete(SciDrive_Directory)
         isUrl = url.startswith("http")
         assert responseCreate is True
         assert isUrl is True
-        # assert responseDelete is True
 
-    def test_upload_download(self, noscidrive, newfile):
+    def test_upload(self, newfile, noscidrive):
+        path = SciDrive_Directory + "/" + SciDrive_FileName
+        responseUpload = scidrive.upload(path=path, localFilePath=SciDrive_FileName)
+        assert responseUpload is not None
+        assert responseUpload['path'] == path
+
+    @pytest.mark.parametrize('datatype, outformat',
+                             [('file', 'StringIO'),
+                              ('data', 'text')])
+    def test_download(self, newfile, noscidrive, datatype, outformat):
         # open a file in Python 2 or 3
 
         path = SciDrive_Directory + "/" + SciDrive_FileName
-        responseUpload = scidrive.upload(path=path, localFilePath=SciDrive_FileName)
 
-        stringio = scidrive.download(path=path, outformat="StringIO")
-        fileContent = stringio.read()
-        responseDelete = scidrive.delete(SciDrive_Directory)
+        if datatype == 'file':
+            responseUpload = scidrive.upload(path=path, localFilePath=SciDrive_FileName)
+            stringio = scidrive.download(path=path, outformat=outformat)
+            data = fileContent = stringio.read()
+        elif datatype == 'data':
+            responseUpload = scidrive.upload(path=path, data=SciDrive_FileContent)
+            data = scidrive.download(path=path, outformat=outformat)
+
         assert responseUpload["path"] == path
-        assert fileContent == SciDrive_FileContent
-        assert responseDelete is True
-
-        responseUpload = scidrive.upload(path=path, data=SciDrive_FileContent)
-        fileContent = scidrive.download(path=path, outformat="text")
-        responseDelete = scidrive.delete(SciDrive_Directory)
-        assert responseUpload["path"] == path
-        assert fileContent == SciDrive_FileContent
-        assert responseDelete is True
-
+        assert data == SciDrive_FileContent

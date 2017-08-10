@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 14:10:11
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-09 23:39:09
+# @Last Modified time: 2017-08-10 09:47:24
 
 from __future__ import print_function, division, absolute_import
 from sciserver import casjobs
@@ -89,15 +89,13 @@ class TestCasJobs(object):
         df = pandas.read_csv(StringIO(CasJobs_TestTableCSV), index_col=None)
         result = casjobs.uploadPandasDataFrameToTable(dataFrame=df, tableName=CasJobs_TestTableName2, context="MyDB")
         table = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
-        result2 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="csv")
         assert result is True
-        assert table.all() == df.all()
+        assert table['Column1'].item() == df['Column1'].item()
 
     def test_uploadCSVDataToTable(self, remove_query):
         df = pandas.read_csv(StringIO(CasJobs_TestTableCSV), index_col=None)
         result = casjobs.uploadCSVDataToTable(csvData=CasJobs_TestTableCSV, tableName=CasJobs_TestTableName2, context="MyDB")
         df2 = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
-        result2 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="csv")
         assert result is True
-        assert df.all() == df2.all()
+        assert df['Column1'].item() == df2['Column1'].item()
 
