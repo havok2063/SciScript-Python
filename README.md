@@ -22,7 +22,9 @@ Maintainer of this repo: Brian Cherinka.
 
 Original Authors: Gerard Lemson, Manuchehr Taghizadeh-Popp.
 
-[Documentation](): documentation on read the docs soon!
+[![readthedocs](https://readthedocs.org/projects/docs/badge/)](http://sdss-marvin.readthedocs.io/en/latest/)
+
+[Documentation](http://sciserver.readthedocs.io/en/latest/): Python tools for SciServer
 
 Installation
 ------------
