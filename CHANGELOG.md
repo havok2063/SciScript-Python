@@ -4,7 +4,7 @@
 
 ### Added:
 - Global SciServer config
-- Added invoke tasks to make docs build, cleanup,  and pypi deploy easier
+- Added invoke tasks to make docs build, cleanup, and pypi deploy easier
 
 ### Changed:
 - Major refactor:

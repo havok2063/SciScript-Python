@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 10:05:23
+# @Last Modified time: 2017-08-10 08:29:37
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -17,36 +17,36 @@ __version__ = "v1.10.2"  # sciserver release version
 class SciServerConfig(object):
     ''' Global configuration for SciServer
 
-        The SciServer.Config module contains important parameters for the correct functioning of the
+        The sciserver.config contains important parameters for the correct functioning of the
         SciServer package.
 
         Although these parameters must be set/defined by the admin or user before the installation of the
         package, they can also be accessed and changed on-the-fly while on the python session.
 
-        - **Config.CasJobsRESTUri**: defines the base URL of the CasJobs web API (string).
+        - ** config.CasJobsRESTUri**: defines the base URL of the CasJobs web API (string).
           E.g., "https://skyserver.sdss.org/CasJobs/RestApi"
 
-        - **Config.AuthenticationURL**: defines the base URL of the Authentication web service API (string).
+        - ** config.AuthenticationURL**: defines the base URL of the Authentication web service API (string).
           E.g., "https://portal.sciserver.org/login-portal/keystone/v3/tokens"
 
-        - **Config.SciDriveHost**: defines the base URL of the SciDrive web service API (string).
+        - ** config.SciDriveHost**: defines the base URL of the SciDrive web service API (string).
           E.g., "https://www.scidrive.org"
 
-        - **Config.SkyQueryUrl**: defines the base URL of the SkyQuery web service API (string).
+        - ** config.SkyQueryUrl**: defines the base URL of the SkyQuery web service API (string).
           E.g., "http://voservices.net/skyquery/Api/V1"
 
-        - **Config.SkyServerWSurl**: defines the base URL of the SkyServer web service API (string).
+        - ** config.SkyServerWSurl**: defines the base URL of the SkyServer web service API (string).
           E.g., "https://skyserver.sdss.org"
 
-        - **Config.DataRelease**: defines the SDSS data release (string), to be used to build the full
-          SkyServer API url along with Config.SkyServerWSurl.
+        - ** config.DataRelease**: defines the SDSS data release (string), to be used to build the full
+          SkyServer API url along with  config.SkyServerWSurl.
           E.g., "DR13"
 
-        - **Config.KeystoneTokenPath**: defines the local path (string) to the file containing the
+        - ** config.KeystoneTokenPath**: defines the local path (string) to the file containing the
           user's authentication token in the SciServer-Compute environment.
           E.g., "/home/idies/keystone.token". Unlikely to change since it is hardcoded in SciServer-Compute.
 
-        - **Config.version**: defines the SciServer release version tag (string), to which this
+        - ** config.version**: defines the SciServer release version tag (string), to which this
           package belongs.
           E.g., "sciserver-v1.9.3"
 
@@ -83,10 +83,13 @@ class SciServerConfig(object):
         return os.path.isfile(self.KeystoneTokenPath)
 
     def get_token(self):
-        ''' Get a token '''
+        ''' Get a token from the sciserver environment '''
         if not self.token:
             from sciserver import authentication as auth
-            self.token = auth.get_token()
+            if self.isSciServerComputeEnvironment():
+                self.token = auth.getToken()
+            else:
+                self.token = auth.login()
 
 
 # create the config object

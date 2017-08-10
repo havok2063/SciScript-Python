@@ -6,17 +6,17 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:24:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 14:35:05
+# @Last Modified time: 2017-08-09 13:39:45
 
 from __future__ import print_function, division, absolute_import
 import pytest
-from sciserver import authentication
+from sciserver import authentication, config
 
 
-userinfo = [('***', '***')]
+userinfo = [('testuser', 'testpass')]
 
 
-@pytest.fixture(params=userinfo)
+@pytest.fixture(scope='session', params=userinfo)
 def userdata(request):
     ''' Fixture to loop over user info '''
     user, password = request.param
@@ -28,5 +28,6 @@ def token(userdata):
     ''' Fixture to generate a token using auth '''
     login, password = userdata
     token = authentication.login(login, password)
+    config.token = token
     yield token
     token = None

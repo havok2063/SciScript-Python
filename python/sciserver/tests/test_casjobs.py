@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 14:10:11
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 14:23:50
+# @Last Modified time: 2017-08-09 23:39:09
 
 from __future__ import print_function, division, absolute_import
 from sciserver import casjobs
@@ -32,6 +32,7 @@ def remove_query():
     csv = None
 
 
+@pytest.mark.usefixtures('token')
 class TestCasJobs(object):
 
     def test_getSchemaName(self):
@@ -77,7 +78,7 @@ class TestCasJobs(object):
 
     def test_getPandasDataFrameFromQuery(self):
         df = casjobs.getPandasDataFrameFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
-        self.assertEqual(df.to_csv(index=False), CasJobs_TestTableCSV)
+        assert df.to_csv(index=False) == CasJobs_TestTableCSV
 
     def test_getNumpyArrayFromQuery(self):
         array = casjobs.getNumpyArrayFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
@@ -90,7 +91,7 @@ class TestCasJobs(object):
         table = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
         result2 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="csv")
         assert result is True
-        assert table == df
+        assert table.all() == df.all()
 
     def test_uploadCSVDataToTable(self, remove_query):
         df = pandas.read_csv(StringIO(CasJobs_TestTableCSV), index_col=None)
@@ -98,5 +99,5 @@ class TestCasJobs(object):
         df2 = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
         result2 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="csv")
         assert result is True
-        assert df == df2
+        assert df.all() == df2.all()
 

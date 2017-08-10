@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 11:38:53
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-07 12:00:24
+# @Last Modified time: 2017-08-09 13:34:34
 
 from __future__ import print_function, division, absolute_import
 from sciserver import skyquery
@@ -18,7 +18,7 @@ SkyQuery_TestTableCSVdownloaded = "#ID,Column1,Column2\n1,4.5,5.5\n"
 SkyQuery_Query = "select 4.5 as Column1, 5.5 as Column2"
 
 
-#@pytest.mark.usefixtures("token")
+@pytest.mark.usefixtures("token")
 class TestSkyQuerySubmit(object):
 
     def test_listqueues(self):
@@ -67,7 +67,7 @@ def uploadtable(droptable):
     result = None
 
 
-#@pytest.mark.usefixtures("token")
+@pytest.mark.usefixtures("token")
 class TestSkyQueryTable(object):
 
     def test_uploadtable(self, droptable):
@@ -90,7 +90,7 @@ class TestSkyQueryTable(object):
         assert result is True
 
 
-#@pytest.mark.usefixtures("token")
+@pytest.mark.usefixtures("token")
 class TestSkyQueryGetDbInfo(object):
 
     @pytest.mark.parametrize('qtype', [('quick'), ('long')])
