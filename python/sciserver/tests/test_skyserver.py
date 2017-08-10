@@ -6,11 +6,12 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 19:53:26
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-06 20:26:05
+# @Last Modified time: 2017-08-10 10:31:42
 
 from __future__ import print_function, division, absolute_import
 import pytest
 import skimage
+import os
 from sciserver import skyserver
 
 # skyserver test data
@@ -32,7 +33,8 @@ class TestSkyServer(object):
         img = skyserver.getJpegImgCutout(ra=197.614455642896, dec=18.438168853724, width=512,
                                          height=512, scale=0.4, dataRelease=SkyServer_DataRelease,
                                          opt="OG", query="SELECT TOP 100 p.objID, p.ra, p.dec, p.r FROM fGetObjFromRectEq(197.6,18.4,197.7,18.5) n, PhotoPrimary p WHERE n.objID=p.objID")
-        im = skimage.io.imread("data/TestGalaxy.jpeg")
+        testimg = os.path.join(os.path.dirname(__file__), 'data/TestGalaxy.jpeg')
+        im = skimage.io.imread(testimg)
         assert img.tobytes() == im.tobytes()
 
     def test_radialsearch(self):
