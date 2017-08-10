@@ -15,6 +15,7 @@
 
 import sys
 import os
+import sphinx_rtd_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -51,6 +52,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'SciScript-Python'
 copyright = '2017, SciServer'
+author = u'Gerard Lemson, Manuchehr Taghizadeh-Popp, Brian Cherinka'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -85,7 +87,7 @@ exclude_patterns = ['_build']
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -110,7 +112,7 @@ html_theme = 'sphinx_rtd_theme'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_path = sphinx_rtd_theme.get_html_theme_path()
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -183,7 +185,7 @@ html_sidebars = {'**': ['localtoc.html']}
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'sphinxdoc'
+htmlhelp_basename = 'sciserverdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -203,8 +205,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'sphinx.tex', '. Documentation',
-   'Gerard Lemson, Manuchehr Taghizadeh-Popp', 'manual'),
+  (master_doc, 'SciServer.tex', u'SciServer Documentation',
+   'Gerard Lemson, Manuchehr Taghizadeh-Popp, Brian Cherinka', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -233,8 +235,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'sphinx', '. Documentation',
-     ['Gerard Lemson, Manuchehr Taghizadeh-Popp'], 1)
+    (master_doc, 'sciserver', u'SciServer Documentation',
+     [author], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -247,8 +249,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'sphinx', '. Documentation',
-   'gerard Lemson, Manuchehr Taghizadeh-Popp', 'sphinx', 'One line description of project.',
+  (master_doc, 'SciServer', 'SciServer Documentation',
+   author, 'SciServer', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -269,9 +271,9 @@ texinfo_documents = [
 
 # Bibliographic Dublin Core info.
 epub_title = '.'
-epub_author = 'Gerard Lemson, Manuchehr Taghizadeh-Popp'
-epub_publisher = 'Gerard Lemson, Manuchehr Taghizadeh-Popp'
-epub_copyright = '2016, SciServer'
+epub_author = author
+epub_publisher = author
+epub_copyright = '2017, SciServer'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = '.'
