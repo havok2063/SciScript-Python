@@ -1,61 +1,53 @@
-SciServer package
-=================
+SciServer API Reference
+=======================
 
 .. automodule:: sciserver
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.casjobs module
-------------------------
+Casjobs
+-------
 
 .. automodule:: sciserver.casjobs
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.config module
-------------------------
-
-.. automodule:: sciserver.config
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-sciserver.authentication module
-------------------------
+Authentication
+--------------
 
 .. automodule:: sciserver.authentication
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.loginportal module
-------------------------
+Loginportal
+-----------
 
 .. automodule:: sciserver.loginportal
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.scidrive module
-------------------------
+Scidrive
+--------
 
 .. automodule:: sciserver.scidrive
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.skyserver module
-------------------------
+Skyserver
+---------
 
 .. automodule:: sciserver.skyserver
     :members:
     :undoc-members:
     :show-inheritance:
 
-sciserver.skyquery module
-------------------------
+Skyquery
+--------
 
 .. automodule:: sciserver.skyquery
     :members:

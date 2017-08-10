@@ -3,13 +3,29 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to SciScript Python documentation!
-=============================
+Welcome to SciScript (Python) documentation!
+============================================
 
-Contents:
+`SciServer <http://www.sciserver.org>`_ is a collaborative research environment for large-scale data-driven science.  This documentation describes the suite of Python scripts used to interact with the SciServer environment.  Find us on `Github <https://github.com/havok2063/SciScript-Python>`_.
+
+
+At a Glance
+===========
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
+
+   installation
+
+Components
+==========
+
+
+Documentation
+=============
+
+.. toctree::
+   :maxdepth: 2
 
    SciServer
 
