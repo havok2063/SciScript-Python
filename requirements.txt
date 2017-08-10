@@ -3,4 +3,5 @@ pandas>=0.18.1
 scikit-image>=0.12.3
 sphinx>=1.5
 sphinx_rtd_theme>=0.2.4
+sphinxcontrib-fulltoc>=1.2.0
 invoke>=0.18.1
