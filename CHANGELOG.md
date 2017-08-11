@@ -1,6 +1,6 @@
 # SciScipt's Change Log
 
-## [1.11.0dev0] - unreleased
+## [1.11.0dev] - unreleased
 
 ### Added:
 - Global SciServer config

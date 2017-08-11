@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:25:03
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 07:31:06
+# @Last Modified time: 2017-08-10 23:08:13
 
 from __future__ import print_function, division, absolute_import
 from setuptools import setup, find_packages
@@ -17,7 +17,7 @@ install_requires = [line.strip().replace('==', '>=') for line in open(requiremen
                     if not line.strip().startswith('#') and line.strip() != '']
 
 NAME = 'sciserver'
-VERSION = '1.11.0dev0'
+VERSION = '1.11.0dev'
 
 setup(
     name=NAME,
