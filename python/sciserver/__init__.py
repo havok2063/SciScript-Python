@@ -6,12 +6,12 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 11:25:38
+# @Last Modified time: 2017-08-10 22:11:10
 
 from __future__ import print_function, division, absolute_import
 import os
 
-__version__ = "v1.10.2"  # sciserver release version
+__version__ = "1.11.0dev0"  # sciserver release version
 
 
 class SciServerConfig(object):

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 10:25:45
+# @Last Modified time: 2017-08-10 20:24:11
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -21,13 +21,22 @@ def createContainer(path):
     """
     Creates a container (directory) in SciDrive
 
-    :param path: path of the directory in SciDrive.
-    :return: Returns True if the container (directory) was created successfully.
-    :raises: Throws an exception if the user is not logged into SciServer
-    (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-    :example: response = SciDrive.createContainer("MyDirectory")
+    Parameters:
+        path (str):
+            The path of the directory in SciDrive
 
-    .. seealso:: SciDrive.upload.
+    Returns:
+        True if the container was created successfully
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> response = SciDrive.createContainer("MyDirectory")
+
+    See Also:
+        SciDrive.upload.
+
     """
 
     containerBody = ('<vos:node xmlns:xsi="http://www.w3.org/2001/thisSchema-instance" '
@@ -50,14 +59,27 @@ def upload(path, data="", localFilePath=""):
     """
     Uploads data or a local file into a SciDrive directory.
 
-    :param path: desired file path in SciDrive (string).
-    :param data: data to be uploaded into SciDrive. If the 'localFilePath' parameter is set, then the local file will be uploaded instead.
-    :param localFilePath: path to the local file to be uploaded (string).
-    :return: Returns an object with the attributes of the uploaded file.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-    :example: response = SciDrive.upload("/SciDrive/path/to/file.csv", localFilePath="/local/path/to/file.csv")
+    Parameters:
+        path (str):
+            Desired filepath in SciDrive
+        data (str):
+            data content to be uploaded into SciDrive. If the localFilePath parameter is set,
+            then the local file will be uploaded instead.
+        localFilePath (str):
+            path to the local file to be uploaded
 
-    .. seealso:: SciDrive.createContainer
+    Returns:
+        A JSON object with the attributes of the uploaded file.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> response = SciDrive.upload("/SciDrive/path/to/file.csv", localFilePath="/local/path/to/file.csv")
+
+    See Also:
+        SciDrive.createContainer
+
     """
 
     url = config.SciDriveHost + '/vospace-2.0/1/files_put/dropbox/' + path
@@ -81,12 +103,23 @@ def publicUrl(path):
     """
     Gets the public URL of a file (or directory) in SciDrive.
 
-    :param path: path of the file (or directory) in SciDrive.
-    :return: URL of a file in SciDrive (string).
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-    :example: url = SciDrive.publicUrl("path/to/SciDrive/file.csv")
+    Parameters:
+        path (str):
+            The path of the file or directory in SciDrive
 
-    .. seealso:: SciDrive.upload
+    Returns:
+        fileUrl (str):
+            the URL of a file in SciDrive
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> url = SciDrive.publicUrl("path/to/SciDrive/file.csv")
+
+    See Also:
+        SciDrive.upload.
+
     """
 
     url = '{0}/vospace-2.0/1/media/sandbox/{1}'.format(config.SciDriveHost, path)
@@ -103,12 +136,23 @@ def directoryList(path=""):
     """
     Gets the contents and metadata of a SciDrive directory (or file).
 
-    :param path: path of the directory (or file ) in SciDrive.
-    :return: a dictionary containing info and metadata of the directory (or file).
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-    :example: dirList = SciDrive.directoryList("path/to/SciDrive/directory")
+    Parameters:
+        path (str):
+            The path of the file or directory in SciDrive
 
-    .. seealso:: SciDrive.upload, SciDrive.download
+    Returns:
+        jsonRes (dict):
+            a dictionary containing info and metadata of the directory (or file).
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> dirList = SciDrive.directoryList("path/to/SciDrive/directory")
+
+    See Also:
+        SciDrive.upload, SciDrive.download
+
     """
 
     url = "{0}/vospace-2.0/1/metadata/sandbox/{1}?list=True&path={1}".format(config.SciDriveHost, path)
@@ -121,17 +165,39 @@ def directoryList(path=""):
 
 @checkAuth
 def download(path, outformat="text", localFilePath=""):
-    """
-    Downloads a file (directory) from SciDrive into the local file system, or returns the file conetent as an object in several formats.
+    """ Downloads a file or directory from SciDrive
 
-    :param path: path of the file (or directory) in SciDrive.
-    :param format: type of the returned object. Can be "StringIO" (io.StringIO object containing readable text), "BytesIO" (io.BytesIO object containing readable binary data), "response" ( the HTTP response as an object of class requests.Response) or "text" (a text string). If the parameter 'localFilePath' is defined, then the 'format' parameter is not used and the file is downloaded to the local file system instead.
-    :param localFilePath: local path of the file to be downloaded. If 'localFilePath' is defined, then the 'format' parameter is not used.
-    :return: If the 'localFilePath' parameter is defined, then it will return True when the file is downloaded successfully in the local file system. If the 'localFilePath' is not defined, then the type of the returned object depends on the value of the 'format' parameter (either io.StringIO, io.BytesIO, requests.Response or string).
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-    :example: csvString = SciDrive.download("path/to/SciDrive/file.csv", format="text");
+    Downloads a file (directory) from SciDrive into the local file system,
+    or returns the file conetent as an object in several formats.
 
-    .. seealso:: SciDrive.upload
+    Parameters:
+        path (str):
+            The path of the file or directory in SciDrive
+        outformat (str):
+            Format of the returned data.  Can be "StringIO" (io.StringIO object containing readable text),
+            "BytesIO" (io.BytesIO object containing readable binary data),
+            "response" ( the HTTP response as an object of class requests.Response)
+            or "text" (a text string). If the parameter 'localFilePath' is defined,
+            then the 'format' parameter is not used and the file is downloaded to the local file system instead.
+        localFilePath (str):
+            local path of the file to be downloaded.  If defined, then outformat is not used.
+
+    Returns:
+        bool: True if 'localFilePath' parameter is defined, and the file is downloaded successfully
+
+        If the 'localFilePath' is not defined, then the type of the returned object
+        depends on the value of the 'outformat' parameter
+        (either io.StringIO, io.BytesIO, requests.Response or string).
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> csvString = SciDrive.download("path/to/SciDrive/file.csv", format="text")
+
+    See Also:
+        SciDrive.upload
+
     """
 
     fileUrl = publicUrl(path)
@@ -167,12 +233,22 @@ def delete(path):
     """
     Deletes a file or container (directory) in SciDrive.
 
-    :param path: path of the file or container (directory) in SciDrive.
-    :return: Returns True if the file or container (directory) was deleted successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SciDrive API returns an error.
-        :example: response = SciDrive.delete("path/to/SciDrive/file.csv")
+    Parameters:
+        path (str):
+            The path of the file or directory in SciDrive
 
-    .. seealso:: SciDrive.upload.
+    Returns:
+        True if the file or container (directory) was deleted successfully.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SciDrive API returns an error.
+
+    Example:
+        >>> response = SciDrive.delete("path/to/SciDrive/file.csv")
+
+    See Also:
+        SciDrive.upload
+
     """
 
     containerBody = ('<vos:node xmlns:xsi="http://www.w3.org/2001/thisSchema-instance" '
