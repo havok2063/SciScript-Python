@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:00:25
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 10:28:32
+# @Last Modified time: 2017-08-12 13:28:43
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO
@@ -19,15 +19,27 @@ from sciserver.utils import checkAuth, send_request
 
 @checkAuth
 def getJobStatus(jobId):
-    """
-    Gets the status of a job, as well as other related metadata (more info in http://www.voservices.net/skyquery).
+    """ Get the status of a job
 
-    :param jobId: the ID of the job (string), which is obtained at the moment of submitting the job.
-    :return: a dictionary with the job status and other related metadata.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: status = SkyQuery.getJobStatus(SkyQuery.submitJob("select 1 as foo"))
+    Gets the status of a job, as well as other related metadata
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.submitJob, SkyQuery.cancelJob
+    Parameters:
+        jobId (str):
+            the ID of the job, which is obtained at the moment of submitting the job.
+
+    Returns:
+        dict: a dictionary with the job status and other related metadata.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> status = skyquery.getJobStatus(skyquery.submitJob("select 1 as foo"))
+
+    See Also:
+        SkyQuery.submitJob, SkyQuery.cancelJob
+
     """
 
     statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
@@ -41,15 +53,26 @@ def getJobStatus(jobId):
 
 @checkAuth
 def cancelJob(jobId):
-    """
+    """ Cancels a job
+
     Cancels a single job (more info in http://www.voservices.net/skyquery).
 
-    :param jobId: the ID of the job, which is obtained at the moment of submitting the job.
-    :return: Returns True if the job was cancelled successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: isCanceled = SkyQuery.cancelJob(SkyQuery.submitJob("select 1 as foo"))
+    Parameters:
+        jobId (str):
+            the ID of the job, which is obtained at the moment of submitting the job.
 
-    .. seealso:: SkyQuery.submitJob, SkyQuery.getJobStatus
+    Returns:
+        True if the job was cancelled successfully
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> isCanceled = SkyQuery.cancelJob(SkyQuery.submitJob("select 1 as foo"))
+
+    See Also:
+        SkyQuery.submitJob, SkyQuery.getJobStatus
+
     """
 
     statusURL = '{0}/Jobs.svc/jobs/{1}'.format(config.SkyQueryUrl, jobId)
@@ -71,14 +94,23 @@ def cancelJob(jobId):
 
 @checkAuth
 def listQueues():
-    """
-    Returns a list of all available job queues and related metadata (more info in http://www.voservices.net/skyquery).
+    """ Retrieves a list of job queues
 
-    :return: a list of all available job queues and related metadata.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: queueList = SkyQuery.listQueues()
+    Returns a list of all available job queues and
+    related metadata (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.getQueueInfo, SkyQuery.submitJob, SkyQuery.getJobStatus
+    Returns:
+        a list of all available job queues and related metadata
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> queueList = SkyQuery.listQueues()
+
+    See Also:
+        SkyQuery.getQueueInfo, SkyQuery.submitJob, SkyQuery.getJobStatus
+
     """
 
     jobsURL = '{0}/Jobs.svc/queues'.format(config.SkyQueryUrl)
@@ -92,15 +124,27 @@ def listQueues():
 
 @checkAuth
 def getQueueInfo(queue):
-    """
-    Returns information about a particular job queue (more info in http://www.voservices.net/skyquery).
+    """ Retrieves queue info
 
-    :param queue: queue name (string)
-    :return: a dictionary containing information associated to the queue.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: queueInfo = SkyQuery.getQueueInfo('quick')
+    Returns information about a particular job queue
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.submitJob, SkyQuery.getJobStatus
+    Parameters:
+        queue (str):
+            the name of the queue
+
+    Returns:
+        a dictionary containing information associated to the queue.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> queueInfo = SkyQuery.getQueueInfo('quick')
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.submitJob, SkyQuery.getJobStatus
+
     """
 
     jobsURL = '{0}/Jobs.svc/queues/{1}'.format(config.SkyQueryUrl, queue)
@@ -115,16 +159,28 @@ def getQueueInfo(queue):
 
 @checkAuth
 def submitJob(query, queue='quick'):
-    """
+    """ Submit a job
+
     Submits a new job (more info in http://www.voservices.net/skyquery).
 
-    :param query: sql query (string)
-    :param queue: queue name (string). Can be set to 'quick' for a quick job, or 'long' for a long job.
-    :return: returns the jobId (string), unique identifier of the job.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: jobId = SkyQuery.submitJob('select 1 as foo', "quick")
+    Parameters:
+        query (str):
+            the sql query string
+        queue (str):
+            the name of the queue.  Can be 'quick' (quick job) or 'long' (long job). Default is quick.
 
-    .. seealso:: SkyQuery.getJobStatus, SkyQuery.listQueues
+    Returns:
+        returns the jobId, unique identifier of the job.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> jobId = SkyQuery.submitJob('select 1 as foo', "quick")
+
+    See Also:
+        SSkyQuery.getJobStatus, SkyQuery.listQueues
+
     """
 
     jobsURL = '{0}/Jobs.svc/queues/{1}/jobs'.format(config.SkyQueryUrl, queue)
@@ -140,16 +196,29 @@ def submitJob(query, queue='quick'):
 
 
 def waitForJob(jobId, verbose=True):
-    """
-    Queries the job status from SkyQuery every 2 seconds and waits for the SkyQuery job to be completed.
+    """ Wait for a running job to finish
 
-    :param jobId: id of job (integer)
-    :param verbose: if True, will print "wait" messages on the screen while the job is not done. If False, will suppress printing messages on the screen.
-    :return: After the job is finished, returns a dictionary object containing the job status and related metadata.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: SkyQuery.waitForJob(SkyQuery.submitJob("select 1"))
+    Queries the job status from SkyQuery every 2 seconds and waits
+    for the SkyQuery job to be completed.
 
-    .. seealso:: SkyQuery.submitJob, SkyQuery.getJobStatus.
+    Parameters:
+        jobId (str):
+            the ID of the job, which is obtained at the moment of submitting the job.
+        verbose (bool):
+            if True, prints 'wait' messages while the job is running.
+
+    Returns:
+        dict: a dictionary with the job status and other related metadata.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> skyquery.waitForJob(skyquery.submitJob("select 1"))
+
+    See Also:
+        SkyQuery.submitJob, SkyQuery.getJobStatus.
+
     """
     try:
         complete = False
@@ -177,15 +246,28 @@ def waitForJob(jobId, verbose=True):
 
 @checkAuth
 def listJobs(queue="quick"):
-    """
-    Lists the jobs in the queue in descending order by submission time. Only jobs of the authenticated user are listed (more info in http://www.voservices.net/skyquery).
+    """ Lists the jobs in the queue
 
-    :param queue: queue name (string). Can be set to 'quick' for a quick job, or 'long' for a long job.
-    :return: returns job definitions as a list object.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: jobsList = SkyQuery.listJobs('quick')
+    Lists the jobs in the queue in descending order by submission time.
+    Only jobs of the authenticated user are listed
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.getJobStatus, SkyQuery.listQueues
+    Parameters:
+        queue (str):
+            the name of the queue.  Can be 'quick' (quick job) or 'long' (long job). Default is quick.
+
+    Returns:
+        list: a list of job definitions
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> jobsList = SkyQuery.listJobs('quick')
+
+    See Also:
+        SkyQuery.getJobStatus, SkyQuery.listQueues
+
     """
 
     jobsURL = '{0}/Jobs.svc/queues/{1}/jobs?'.format(config.SkyQueryUrl, queue)
@@ -197,19 +279,26 @@ def listJobs(queue="quick"):
         return r['jobs']
 
 
-# Schema:
-
-
 @checkAuth
 def listAllDatasets():
-    """
+    """ List all the datasets
+
     Lists all available datasets (more info in http://www.voservices.net/skyquery).
 
-    :return: returns dataset definitions as a list object.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: datasets = SkyQuery.listAllDatasets()
+    Returns:
+        list: a list of job definitions
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> datasets = SkyQuery.listAllDatasets()
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables,
+        SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable,
+        SkyQuery.dropTable
+
     """
 
     schemaURL = '{0}/Schema.svc/datasets'.format(config.SkyQueryUrl)
@@ -224,14 +313,27 @@ def listAllDatasets():
 @checkAuth
 def getDatasetInfo(datasetName="MyDB"):
     """
-    Gets information related to a particular dataset (more info in http://www.voservices.net/skyquery).
+    Gets information related to a particular dataset
+    (more info in http://www.voservices.net/skyquery).
 
-    :param datasetName: name of dataset (string).
-    :return: returns a dictionary containing the dataset information.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: info = SkyQuery.getDatasetInfo("MyDB")
+    Parameters:
+        datasetName (str):
+            the name of the dataset
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
+    Returns:
+        dict: a dictionary containing the dataset definition
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> info = SkyQuery.getDatasetInfo("MyDB")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.listDatasetTables,
+        SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable,
+        SkyQuery.dropTable
+
     """
 
     schemaURL = '{0}/Schema.svc/datasets/{1}'.format(config.SkyQueryUrl, datasetName)
@@ -244,15 +346,29 @@ def getDatasetInfo(datasetName="MyDB"):
 
 
 def listDatasetTables(datasetName="MyDB"):
-    """
-    Returns a list of all tables within a dataset (more info in http://www.voservices.net/skyquery).
+    """ Return a list of all tables
 
-    :param datasetName: name of dataset (string).
-    :return: returns a list containing the tables and associated descriptions/metadata.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: tables = SkyQuery.listDatasetTables("MyDB")
+    Returns a list of all tables within a dataset
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
+    Parameters:
+        datasetName (str):
+            the name of the dataset
+
+    Returns:
+        list: a list containing the tables and associated descriptions/metadata.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> tables = SkyQuery.listDatasetTables("MyDB")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.getTableInfo, SkyQuery.listTableColumns, SkyQuery.getTable,
+        SkyQuery.dropTable
+
     """
 
     url = '{0}/Schema.svc/datasets/{1}/tables'.format(config.SkyQueryUrl, datasetName)
@@ -266,16 +382,31 @@ def listDatasetTables(datasetName="MyDB"):
 
 @checkAuth
 def getTableInfo(tableName, datasetName="MyDB"):
-    """
-    Returns info about a particular table belonging to a dataset (more info in http://www.voservices.net/skyquery).
+    """ Returns table information
 
-    :param tableName: name of table (string) within dataset.
-    :param datasetName: name of dataset (string).
-    :return: returns a dictionary containing the table properties and associated info/metadata.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: info = SkyQuery.getTableInfo("myTable", datasetName="MyDB")
+    Returns info about a particular table belonging to a dataset
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.listTableColumns, SkyQuery.getTable, SkyQuery.dropTable
+    Parameters:
+        tableName (str):
+            the name of the table in a dataset
+        datasetName (str):
+            the name of the dataset
+
+    Returns:
+        dict: a dictionary containing the tables properties and associated info/metadata.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> info = SkyQuery.getTableInfo("myTable", datasetName="MyDB")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.listDatasetTables, SkyQuery.listTableColumns, SkyQuery.getTable,
+        SkyQuery.dropTable
+
     """
 
     url = '{0}/Schema.svc/datasets/{1}/tables/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
@@ -290,16 +421,31 @@ def getTableInfo(tableName, datasetName="MyDB"):
 
 @checkAuth
 def listTableColumns(tableName, datasetName="MyDB"):
-    """
-    Returns a list of all columns in a table belonging to a particular dataset (more info in http://www.voservices.net/skyquery).
+    """ Returns columns of a table
 
-    :param tableName: name of table (string) within dataset.
-    :param datasetName: name of dataset (string).
-    :return: returns a list containing the columns and associated descriptions.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: columns = SkyQuery.listTableColumns("myTable", datasetName="MyDB")
+    Returns a list of all columns in a table belonging to a particular
+    dataset (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.dropTable
+    Parameters:
+        tableName (str):
+            the name of the table in a dataset
+        datasetName (str):
+            the name of the dataset
+
+    Returns:
+        list: a list containing the columns and associated descriptions.
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> columns = SkyQuery.listTableColumns("myTable", datasetName="MyDB")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable,
+        SkyQuery.dropTable
+
     """
 
     url = '{0}/Schema.svc/datasets/{1}/tables/{2}/columns'.format(config.SkyQueryUrl, datasetName, tableName)
@@ -316,17 +462,33 @@ def listTableColumns(tableName, datasetName="MyDB"):
 
 @checkAuth
 def getTable(tableName, datasetName="MyDB", top=None):
-    """
-    Returns a dataset table as a pandas DataFrame (more info in http://www.voservices.net/skyquery).
+    """ Return a table
 
-    :param tableName: name of table (string) within dataset.
-    :param datasetName: name of dataset or database context (string).
-    :param top: number of top rows retrieved (integer).
-    :return: returns the table as a Pandas dataframe.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: table = SkyQuery.getTable("myTable", datasetName="MyDB", top=10)
+    Returns a dataset table as a pandas DataFrame
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.dropTable, SkyQuery.submitJob
+    Parameters:
+        tableName (str):
+            the name of the table in a dataset
+        datasetName (str):
+            the name of the dataset
+        top (int):
+            the top number of rows in the table
+
+    Returns:
+        the table as a Pandas dataframe
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> table = SkyQuery.getTable("myTable", datasetName="MyDB", top=10)
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns,
+        SkyQuery.dropTable
+
     """
 
     url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
@@ -343,16 +505,31 @@ def getTable(tableName, datasetName="MyDB", top=None):
 
 @checkAuth
 def dropTable(tableName, datasetName="MyDB"):
-    """
-    Drops (deletes) a table from the user database (more info in http://www.voservices.net/skyquery).
+    """ Drops a db table
 
-    :param tableName: name of table (string) within dataset.
-    :param datasetName: name of dataset or database context (string).
-    :return: returns True if the table was deleted successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: result = SkyQuery.dropTable("myTable", datasetName="MyDB")
+    Drops (deletes) a table from the user database
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.submitJob
+    Parameters:
+        tableName (str):
+            the name of the table in a dataset
+        datasetName (str):
+            the name of the dataset
+
+    Returns:
+        True if the table was dropped successfully
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> result = SkyQuery.dropTable("myTable", datasetName="MyDB")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns,
+        SkyQuery.getTable
+
     """
 
     url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
@@ -365,27 +542,44 @@ def dropTable(tableName, datasetName="MyDB"):
 
 
 @checkAuth
-def uploadTable(uploadData, tableName, datasetName="MyDB", outformat="csv"):
-    """
-    Uploads a data table into a database (more info in http://www.voservices.net/skyquery).
+def uploadTable(uploadData, tableName, datasetName="MyDB", informat="csv"):
+    """ Uploads a table
 
-    :param uploadData: data table, for now accepted in CSV string format.
-    :param tableName: name of table (string) within dataset.
-    :param datasetName: name of dataset or database context (string).
-    :param format: format of the 'data' parameter. Set to 'csv' for now.
-    :return: returns True if the table was uploaded successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the SkyQuery API returns an error.
-    :example: result = SkyQuery.uploadTable("Column1,Column2\n4.5,5.5\n", tableName="myTable", datasetName="MyDB", format="csv")
+    Uploads a data table into a database
+    (more info in http://www.voservices.net/skyquery).
 
-    .. seealso:: SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo, SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.getTable, SkyQuery.submitJob
+    Parameters:
+        uploadData (str):
+            the table data in CSV string format
+        tableName (str):
+            the name of the table in a dataset
+        datasetName (str):
+            the name of the dataset
+        informat (str):
+            The format of the input data.  Default is 'csv'.
+
+    Returns:
+        True if the table was uploaded successfully
+
+    Raises:
+        SciServerAPIError: Throws an exception if the HTTP request to the SkyQuery API returns an error.
+
+    Example:
+        >>> result = SkyQuery.uploadTable("Column1,Column2\n4.5,5.5\n", tableName="myTable", datasetName="MyDB", informat="csv")
+
+    See Also:
+        SkyQuery.listQueues, SkyQuery.listAllDatasets, SkyQuery.getDatasetInfo,
+        SkyQuery.listDatasetTables, SkyQuery.getTableInfo, SkyQuery.listTableColumns,
+        SkyQuery.getTable
+
     """
 
     url = '{0}/Data.svc/{1}/{2}'.format(config.SkyQueryUrl, datasetName, tableName)
     ctype = ""
-    if outformat == "csv":
+    if informat == "csv":
         ctype = 'text/csv'
     else:
-        raise Exception("Unknown format {0} when trying to upload data in SkyQuery.".format(outformat))
+        raise Exception("Unknown format {0} when trying to upload data in SkyQuery.".format(informat))
 
     response = send_request(url, reqtype='put', data=uploadData, content_type=ctype, stream=True,
                             acceptHeader='application/json',

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 11:45:04
+# @Last Modified time: 2017-08-12 13:53:21
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -20,15 +20,24 @@ from sciserver.utils import checkAuth, send_request
 
 @checkAuth
 def getSchemaName():
-    """
-    Returns the WebServiceID that identifies the schema for a user in MyScratch database with CasJobs.
+    """ Returns an id for a database schema
 
-    :return: WebServiceID of the user (string).
-    :raises: Throws an exception if the user is not logged into SciServer (use Authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: wsid = CasJobs.getSchemaName()
+    Returns the WebServiceID that identifies the schema for a
+    user in MyScratch database with CasJobs.
 
-    .. seealso:: CasJobs.getTables.
+    Returns:
+        id (str):
+            the WebServerID of the user
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> wsid = CasJobs.getSchemaName()
+
+    See Also:
+        CasJobs.getTables.
+
     """
 
     keystoneUserId = authentication.getKeystoneUserWithToken(config.token).userid
@@ -43,16 +52,27 @@ def getSchemaName():
 
 @checkAuth
 def getTables(context="MyDB"):
-    """
-    Gets the names, size and creation date of all tables in a database context that the user
-    has access to.
+    """ Gets the info for all tables in a db
 
-    :param context: database context (string)
-    :return: The result is a json object with format [{"Date":seconds,"Name":"TableName","Rows":int,"Size",int},..]
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: tables = CasJobs.getTables("MyDB")
+    Gets the names, size and creation date of all tables in a
+    database context that the user has access to.
 
-    .. seealso:: CasJobs.getSchemaName
+    Parameters:
+        context (str):
+            the database context string (i.e. name of the db)
+
+    Returns:
+        a JSON object with format [{"Date":seconds,"Name":"TableName","Rows":int,"Size",int},..]
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> tables = CasJobs.getTables("MyDB")
+
+    See Also:
+        CasJobs.getSchemaName.
+
     """
 
     TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
@@ -69,22 +89,35 @@ def executeQuery(sql, context="MyDB", outformat="pandas"):
     """
     Executes a synchronous SQL query in a CasJobs database context.
 
-    :param sql: sql query (string)
-    :param context: database context (string)
-    :param format: parameter (string) that specifies the return type:\n
-    \t\t'pandas': pandas.DataFrame.\n
-    \t\t'json': a JSON string containing the query results. \n
-    \t\t'dict': a dictionary created from the JSON string containing the query results.\n
-    \t\t'csv': a csv string.\n
-    \t\t'readable': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
-    \t\t'StringIO': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
-    \t\t'fits': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
-    \t\t'BytesIO': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
-    :return: the query result table, in a format defined by the 'format' input parameter.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error. Throws an exception if parameter 'format' is not correctly specified.
-    :example: table = CasJobs.executeQuery(sql="select 1 as foo, 2 as bar",format="pandas", context="MyDB")
+    Parameters:
+        sql (str):
+            the sql query string
+        context (str):
+            the database context string (i.e. name of the db)
+        outformat (str):
+            the format of return output type. Default is Pandas dataframe.
+            Options are:
+            \t\t'pandas': pandas.DataFrame.\n
+            \t\t'json': a JSON string containing the query results. \n
+            \t\t'dict': a dictionary created from the JSON string containing the query results.\n
+            \t\t'csv': a csv string.\n
+            \t\t'readable': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
+            \t\t'StringIO': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
+            \t\t'fits': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
+            \t\t'BytesIO': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
 
-    .. seealso:: CasJobs.submitJob, CasJobs.getTables, SkyServer.sqlSearch
+    Returns:
+        The query result table, in the format specified
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> table = CasJobs.executeQuery(sql="select 1 as foo, 2 as bar",format="pandas", context="MyDB")
+
+    See Also:
+        CasJobs.submitJob, CasJobs.getTables, SkyServer.sqlSearch
+
     """
 
     if (outformat == "pandas") or (outformat == "json") or (outformat == "dict"):
@@ -139,13 +172,24 @@ def submitJob(sql, context="MyDB"):
     """
     Submits an asynchronous SQL query to the CasJobs queue.
 
-    :param sql: sql query (string)
-    :param context: database context (string)
-    :return: Returns the CasJobs jobID (integer).
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: jobid = CasJobs.submitJob("select 1 as foo","MyDB")
+    Parameters:
+        sql (str):
+            the sql query string
+        context (str):
+            the database context string (i.e. name of the db)
 
-    .. seealso:: CasJobs.executeQuery, CasJobs.getJobStatus, CasJobs.waitForJob, CasJobs.cancelJob.
+    Returns:
+        The CasJobs job id
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> jobid = CasJobs.submitJob("select 1 as foo","MyDB")
+
+    See Also:
+        CasJobs.executeQuery, CasJobs.getJobStatus, CasJobs.waitForJob, CasJobs.cancelJob.
+
     """
 
     QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
@@ -170,18 +214,30 @@ def submitJob(sql, context="MyDB"):
 
 @checkAuth
 def getJobStatus(jobId):
-    """
+    """ Get a job status
+
     Shows the status of a job submitted to CasJobs.
 
-    :param jobId: id of job (integer)
-    :return: Returns a dictionary object containing the job status and related metadata.
-    The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling), 3(Canceled), 4 (Failed) or 5 (Finished).
-    If jobId is the empty string, then returns a list with the statuses of all previous jobs.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login for that purpose).
-    Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: status = CasJobs.getJobStatus(CasJobs.submitJob("select 1"))
+    Parameters:
+        jobId (int):
+            the id of the submitted job
 
-    .. seealso:: CasJobs.submitJob, CasJobs.waitForJob, CasJobs.cancelJob.
+    Returns:
+        a dictionary containing the job status and related metadata.
+
+        The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling),
+        3(Canceled), 4 (Failed) or 5 (Finished). If jobId is the empty string, then returns a list
+        with the statuses of all previous jobs.
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> status = CasJobs.getJobStatus(CasJobs.submitJob("select 1"))
+
+    See Also:
+        CasJobs.submitJob, CasJobs.waitForJob, CasJobs.cancelJob.
+
     """
 
     QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
@@ -197,13 +253,22 @@ def cancelJob(jobId):
     """
     Cancels a job already submitted.
 
-    :param jobId: id of job (integer)
-    :return: Returns True if the job was canceled successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: response = CasJobs.cancelJob(CasJobs.submitJob("select 1"))
+    Parameters:
+        jobId (int):
+            the id of the submitted job
 
-    .. seealso:: CasJobs.submitJob, CasJobs.waitForJob.
+    Returns:
+        True if the job was canceled successfully
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> response = CasJobs.cancelJob(CasJobs.submitJob("select 1"))
+
+    See Also:
+        CasJobs.submitJob, CasJobs.waitForJob
+
     """
 
     QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
@@ -215,21 +280,32 @@ def cancelJob(jobId):
 
 
 def waitForJob(jobId, verbose=True):
-    """
-    Queries the job status from casjobs every 2 seconds and waits for the casjobs job to return a
-    status of 3, 4, or 5 (Cancelled, Failed or Finished, respectively).
+    """ Waits for a job to finish
 
-    :param jobId: id of job (integer)
-    :param verbose: if True, will print "wait" messages on the screen while the job is not done.
-    If False, will suppress printing messages on the screen.
-    :return: After the job is finished, returns a dictionary object containing the job status
-    and related metadata. The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling),
-    3(Canceled), 4 (Failed) or 5 (Finished).
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: CasJobs.waitForJob(CasJobs.submitJob("select 1"))
+    Queries the job status from casjobs every 2 seconds and waits for the
+    casjobs job to return a status of 3, 4, or 5 (Cancelled, Failed or
+    Finished, respectively).
 
-    .. seealso:: CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.cancelJob.
+    Parameters:
+        jobId (int):
+            the id of the submitted job
+        verbose (bool):
+            If True, prints 'wait' messages to the screen
+
+    Returns:
+        a dictonary containing the job status and related metadata
+
+        The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling), 3(Canceled), 4 (Failed) or 5 (Finished).
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> CasJobs.waitForJob(CasJobs.submitJob("select 1"))
+
+    See Also:
+        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.cancelJob
+
     """
 
     try:
@@ -258,19 +334,32 @@ def waitForJob(jobId, verbose=True):
 
 
 def writeFitsFileFromQuery(fileName, queryString, context="MyDB"):
-    """
+    """ Performs a quick query and writes a FITS file
+
     Executes a quick CasJobs query and writes the result to a local Fits file
     (http://www.stsci.edu/institute/software_hardware/pyfits).
 
-    :param fileName: path to the local Fits file to be created (string)
-    :param queryString: sql query (string)
-    :param context: database context (string)
-    :return: Returns True if the fits file was created successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: CasJobs.writeFitsFileFromQuery("/home/user/myFile.fits","select 1 as foo")
+    Parameters:
+        fileName (str):
+            path to the local Fits file to be created
+        queryString (str):
+            the sql query string
+        context (str):
+            the name of the db
 
-    .. seealso:: CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery, CasJobs.getPandasDataFrameFromQuery, CasJobs.getNumpyArrayFromQuery
+    Returns:
+        True if the FITS file was created successfully
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> CasJobs.writeFitsFileFromQuery("/home/user/myFile.fits","select 1 as foo")
+
+    See Also:
+        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+        CasJobs.getPandasDataFrameFromQuery, CasJobs.getNumpyArrayFromQuery
+
     """
     try:
         bytesio = executeQuery(queryString, context=context, outformat="fits")
@@ -287,18 +376,31 @@ def writeFitsFileFromQuery(fileName, queryString, context="MyDB"):
 
 # no explicit index column by default
 def getPandasDataFrameFromQuery(queryString, context="MyDB"):
-    """
-    Executes a casjobs quick query and returns the result as a pandas dataframe object with
-    an index (http://pandas.pydata.org/pandas-docs/stable/).
+    """ Performs a quick query and outputs a Pandas dataframe
 
-    :param queryString: sql query (string)
-    :param context: database context (string)
-    :return: Returns a Pandas dataframe containing the results table.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: df = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB")
+    Executes a casjobs quick query and returns the result as a
+    pandas dataframe object with an index
+    (http://pandas.pydata.org/pandas-docs/stable/).
 
-    .. seealso:: CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery, CasJobs.writeFitsFileFromQuery, CasJobs.getNumpyArrayFromQuery
+    Parameters:
+        queryString (str):
+            the sql query string
+        context (str):
+            the name of the db
+
+    Returns:
+        a Pandas dataframe containing the results table
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> df = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB")
+
+    See Also:
+        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+        CasJobs.writeFitsFileFromQuery, CasJobs.getNumpyArrayFromQuery
+
     """
     try:
         cvsResponse = executeQuery(queryString, context=context, outformat="readable")
@@ -314,18 +416,29 @@ def getPandasDataFrameFromQuery(queryString, context="MyDB"):
 
 
 def getNumpyArrayFromQuery(queryString, context="MyDB"):
-    """
+    """ Performs a quick query and outputs a numpy array
+
     Executes a casjobs query and returns the results table as a Numpy array
     (http://docs.scipy.org/doc/numpy/).
 
-    :param queryString: sql query (string)
-    :param context: database context (string)
-    :return: Returns a Numpy array storing the results table.
-    :raises: Throws an exception if the user is not logged into SciServer (use authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: array = CasJobs.getNumpyArrayFromQuery("select 1 as foo", context="MyDB")
+    Parameters:
+        queryString (str):
+            the sql query string
+        context (str):
+            the name of the db
 
-    .. seealso:: CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery, CasJobs.writeFitsFileFromQuery, CasJobs.getPandasDataFrameFromQuery
+    Returns:
+        a Numpy array storing the results table
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> array = CasJobs.getNumpyArrayFromQuery("select 1 as foo", context="MyDB")
+
+    See Also:
+        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+        CasJobs.writeFitsFileFromQuery, CasJobs.getPandasDataFrameFromQuery
 
     """
     try:
@@ -339,19 +452,32 @@ def getNumpyArrayFromQuery(queryString, context="MyDB"):
 
 # require pandas for now but be able to take a string in the future
 def uploadPandasDataFrameToTable(dataFrame, tableName, context="MyDB"):
-    """
-    Uploads a pandas dataframe object into a CasJobs table. If the dataframe contains a named index,
-    then the index will be uploaded as a column as well.
+    """ Upload a Pandas dataframe
 
-    :param dataFrame: Pandas data frame containg the data (pandas.core.frame.DataFrame)
-    :param tableName: name of CasJobs table to be created.
-    :param context: database context (string)
-    :return: Returns True if the dataframe was uploaded successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use Authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: response = CasJobs.uploadPandasDataFrameToTable(CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB"), "NewTableFromDataFrame")
+    Uploads a pandas dataframe object into a CasJobs table.
+    If the dataframe contains a named index, then the index will be uploaded as
+    a column as well.
 
-    .. seealso:: CasJobs.uploadCSVDataToTable
+    Parameters:
+        dataFrame:
+            Pandas data frame containg the data (pandas.core.frame.DataFrame)
+        tableName (str):
+            the name of the CasJobs table to be created
+        context (str):
+            the name of the db
+
+    Returns:
+        True if the dataframe was uploaded successfully
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> response = CasJobs.uploadPandasDataFrameToTable(CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB"), "NewTableFromDataFrame")
+
+    See Also:
+        CasJobs.uploadCSVDataToTable
+
     """
     try:
         if dataFrame.index.name is not None and dataFrame.index.name != "":
@@ -370,15 +496,26 @@ def uploadCSVDataToTable(csvData, tableName, context="MyDB"):
     """
     Uploads CSV data into a CasJobs table.
 
-    :param csvData: a CSV table in string format.
-    :param tableName: name of CasJobs table to be created.
-    :param context: database context (string)
-    :return: Returns True if the csv data was uploaded successfully.
-    :raises: Throws an exception if the user is not logged into SciServer (use Authentication.login
-    for that purpose). Throws an exception if the HTTP request to the CasJobs API returns an error.
-    :example: csv = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB").to_csv().encode("utf8"); response = CasJobs.uploadCSVDataToTable(csv, "NewTableFromDataFrame")
+    Parameters:
+        csvData:
+            a CSV table in string format.
+        tableName (str):
+            the name of the CasJobs table to be created
+        context (str):
+            the name of the db
 
-    .. seealso:: CasJobs.uploadPandasDataFrameToTable
+    Returns:
+        True if the csv data was uploaded successfully
+
+    Raises:
+        Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+    Example:
+        >>> csv = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB").to_csv().encode("utf8"); response = CasJobs.uploadCSVDataToTable(csv, "NewTableFromDataFrame")
+
+    See Also:
+        CasJobs.uploadPandasDataFrameToTable
+
     """
 
     tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 11:38:53
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-09 13:34:34
+# @Last Modified time: 2017-08-12 13:29:07
 
 from __future__ import print_function, division, absolute_import
 from sciserver import skyquery
@@ -61,7 +61,7 @@ def droptable():
 @pytest.fixture()
 def uploadtable(droptable):
     result = skyquery.uploadTable(uploadData=SkyQuery_TestTableCSV,
-                                  tableName=SkyQuery_TestTableName, datasetName="MyDB", outformat="csv")
+                                  tableName=SkyQuery_TestTableName, datasetName="MyDB", informat="csv")
     assert result is True
     yield result
     result = None
@@ -72,7 +72,7 @@ class TestSkyQueryTable(object):
 
     def test_uploadtable(self, droptable):
         result = skyquery.uploadTable(uploadData=SkyQuery_TestTableCSV,
-                                      tableName=SkyQuery_TestTableName, datasetName="MyDB", outformat="csv")
+                                      tableName=SkyQuery_TestTableName, datasetName="MyDB", informat="csv")
         assert result is True
 
     def test_gettable(self, uploadtable):

@@ -576,7 +576,7 @@ SkyQuery_TestTableCSV = u"Column1,Column2\n4.5,5.5\n"
 
 # uploading the csv table:
 
-result = skyquery.uploadTable(uploadData=SkyQuery_TestTableCSV, tableName=SkyQuery_TestTableName, datasetName="MyDB", outformat="csv")
+result = skyquery.uploadTable(uploadData=SkyQuery_TestTableCSV, tableName=SkyQuery_TestTableName, datasetName="MyDB", informat="csv")
 print(result)
 
 
