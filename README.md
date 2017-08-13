@@ -25,6 +25,9 @@ Original Authors: Gerard Lemson, Manuchehr Taghizadeh-Popp.
 [![Build Status](https://travis-ci.org/havok2063/SciScript-Python.svg?branch=master)](https://travis-ci.org/havok2063/SciScript-Python)[![readthedocs](https://readthedocs.org/projects/docs/badge/)](http://sciserver.readthedocs.io/en/latest/)
 [![Coverage Status](https://coveralls.io/repos/github/havok2063/SciScript-Python/badge.svg?branch=master)](https://coveralls.io/github/havok2063/SciScript-Python?branch=master)
 
+Full Documentation
+------------------
+
 [Documentation](http://sciserver.readthedocs.io/en/latest/): Python tools for SciServer
 
 Installation

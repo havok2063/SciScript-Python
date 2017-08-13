@@ -1,10 +1,14 @@
 SciServer API Reference
 =======================
 
+.. _sciserver-ref-config:
+
 .. automodule:: sciserver
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. _sciserver-ref-casjobs:
 
 Casjobs
 -------
@@ -14,6 +18,8 @@ Casjobs
     :undoc-members:
     :show-inheritance:
 
+.. _sciserver-ref-auth:
+
 Authentication
 --------------
 
@@ -21,6 +27,8 @@ Authentication
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. _sciserver-ref-login:
 
 Loginportal
 -----------
@@ -30,6 +38,8 @@ Loginportal
     :undoc-members:
     :show-inheritance:
 
+.. _sciserver-ref-scidrive:
+
 Scidrive
 --------
 
@@ -37,6 +47,8 @@ Scidrive
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. _sciserver-ref-skyserver:
 
 Skyserver
 ---------
@@ -46,6 +58,8 @@ Skyserver
     :undoc-members:
     :show-inheritance:
 
+.. _sciserver-ref-skyquery:
+
 Skyquery
 --------
 
@@ -53,6 +67,8 @@ Skyquery
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. _sciserver-ref-utils:
 
 Utilities
 ---------

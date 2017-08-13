@@ -16,10 +16,15 @@ At a Glance
    :maxdepth: 2
 
    installation
+   examples
 
 Components
 ==========
 
+.. toctree::
+   :maxdepth: 1
+
+   casjobs
 
 Documentation
 =============

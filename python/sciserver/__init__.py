@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 23:08:17
+# @Last Modified time: 2017-08-13 15:42:17
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -48,7 +48,7 @@ class SciServerConfig(object):
 
         - **config.version**: defines the SciServer release version tag (string), to which this
           package belongs.
-          E.g., "sciserver-v1.9.3"
+          E.g., "1.11.0"
 
     '''
 
