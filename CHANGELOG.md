@@ -9,7 +9,7 @@
 ### Changed:
 - Major refactor:
     - converted to standard python package
-    - added docs to readthedocs
+    - added Sphinx docs and moved to readthedocs
     - made pip installable
     - made python 2/3 compatible
     - reduced boilerplate code

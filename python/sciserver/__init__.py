@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-13 15:42:17
+# @Last Modified time: 2017-08-13 18:02:51
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -90,11 +90,14 @@ class SciServerConfig(object):
 
         '''
         if not self.token:
-            from sciserver import authentication as auth
+            from sciserver.authentication import Authentication
+            auth = Authentication()
             if self.isSciServerComputeEnvironment():
                 self.token = auth.getToken()
             else:
                 self.token = auth.login()
+
+        return self.token
 
 
 # create the config object

@@ -1,0 +1,5 @@
+
+machine portal.sciserver.org
+    login testuser
+    password testpass
+

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-12 13:53:21
+# @Last Modified time: 2017-08-29 11:46:52
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -14,7 +14,8 @@ import json
 import time
 import requests as requests
 import pandas
-from sciserver import authentication, config
+from sciserver import config
+from sciserver.authentication import Authentication
 from sciserver.utils import checkAuth, send_request
 
 
@@ -40,7 +41,8 @@ def getSchemaName():
 
     """
 
-    keystoneUserId = authentication.getKeystoneUserWithToken(config.token).userid
+    auth = Authentication(token=config.token)
+    keystoneUserId = auth.getKeystoneUserWithToken().userid
     usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
 
     response = send_request(usersUrl, content_type='application/json',

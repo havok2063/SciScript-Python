@@ -6,12 +6,12 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 22:12:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-10 11:53:16
+# @Last Modified time: 2017-08-13 18:02:20
 
 from __future__ import print_function, division, absolute_import
 from functools import wraps
 from sciserver.exceptions import SciServerError, SciServerAPIError
-from sciserver import authentication, config
+from sciserver import config
 import requests
 
 
@@ -39,7 +39,7 @@ def checkAuth(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        token = authentication.getToken() or config.token
+        token = config.get_token()
         if not token:
             raise SciServerError('User token is not defined. First log into SciServer.')
         else:
@@ -99,7 +99,7 @@ def make_header(content_type='application/json', accept_header='text/plain'):
     headers = {'Content-Type': content_type, 'Accept': accept_header}
 
     # check for auth token
-    token = authentication.getToken()
+    token = config.get_token()
     if token is not None and token != "":
         headers['X-Auth-Token'] = token
 
