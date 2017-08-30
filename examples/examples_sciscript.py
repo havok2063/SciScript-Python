@@ -9,17 +9,26 @@ import sys
 import json
 import pandas
 import matplotlib.pyplot as plt
-from sciserver import authentication, loginportal, casjobs, skyquery, scidrive, skyserver
+from sciserver import config
+from sciserver.authentication import Authentication
+from sciserver.loginportal import LoginPortal
+from sciserver.casjobs import CasJobs
+from sciserver.skyquery import SkyQuery
+from sciserver.scidrive import SciDrive
+from sciserver.skyserver import SkyServer
 
 # Define login Name and password before running these examples
-Authentication_loginName = 'testuser'
-Authentication_loginPassword = 'testpass'
+# Authentication_loginName = 'testuser'
+# Authentication_loginPassword = 'testpass'
 
 # In[ ]:
 
 # help(SciServer)
 
 # In[ ]:
+
+# Get a token
+token = config.get_token()
 
 # ***************************************
 # Authentication section
@@ -33,45 +42,39 @@ Authentication_loginPassword = 'testpass'
 
 # logging in and getting current token from different ways
 
-token1 = authentication.login(Authentication_loginName, Authentication_loginPassword)
-token2 = authentication.getToken()
-token3 = authentication.getKeystoneToken()
-token4 = authentication.token.value
+auth = Authentication(token=token)
+token1 = auth.login()
+token2 = auth.getToken()
+token3 = auth.token.value
 print("token1=" + token1)
 print("token2=" + token2)
 print("token3=" + token3)
-print("token4=" + token4)
 
 
 # In[ ]:
 
 # getting curent user info
 
-user = authentication.getKeystoneUserWithToken(token1)
+user = auth.getKeystoneUserWithToken()
 print("userName=" + user.userName)
-print("id=" + user.id)
-iden = authentication.identArgIdentifier()
-print("ident=" + iden)
+print("id=" + user.userid)
 
 
 # In[ ]:
 
 # reseting the current token to another value:
 
-authentication.setToken("myToken1")
-token5 = authentication.getToken()
-authentication.setKeystoneToken("myToken2")
-token6 = authentication.getKeystoneToken()
+auth.setToken("myToken1")
+token5 = auth.getToken()
 
 print("token5=" + token5)
-print("token6=" + token6)
 
 
 # In[ ]:
 
 # logging-in again
 
-token1 = authentication.login(Authentication_loginName, Authentication_loginPassword)
+token1 = auth.login()
 
 
 # In[ ]:
@@ -89,40 +92,27 @@ token1 = authentication.login(Authentication_loginName, Authentication_loginPass
 # In[ ]:
 
 # logging in and getting current token from different ways
-
-token1 = loginportal.login(Authentication_loginName, Authentication_loginPassword)
-token2 = loginportal.getToken()
-token3 = loginportal.getKeystoneToken()
+login = LoginPortal()
+token1 = login.login()
+token2 = login.getToken()
 print("token1=" + token1)
 print("token2=" + token2)
-print("token3=" + token3)
 
 
 # In[ ]:
 
 # getting curent user info
 
-user = loginportal.getKeystoneUserWithToken(token1)
+user = login.getKeystoneUserWithToken()
 print("userName=" + user.userName)
-print("id=" + user.id)
-iden = loginportal.identArgIdentifier()
-print("ident=" + iden)
-
-
-# In[ ]:
-
-# reseting the current token to another value:
-
-loginportal.setKeystoneToken("myToken2")
-token6 = loginportal.getKeystoneToken()
-print("token6=" + token6)
+print("id=" + user.userid)
 
 
 # In[ ]:
 
 # logging-in again
 
-token1 = loginportal.login(Authentication_loginName, Authentication_loginPassword)
+token1 = login.login()
 
 
 # In[ ]:
@@ -138,7 +128,7 @@ token1 = loginportal.login(Authentication_loginName, Authentication_loginPasswor
 
 
 # In[ ]:
-
+#
 # Defining databse context and query, and other variables
 
 CasJobs_TestDatabase = "MyDB"
@@ -153,8 +143,9 @@ CasJobs_TestCSVFile = "SciScriptTestFile.csv"
 # In[ ]:
 
 # get user schema info
+cas = CasJobs()
 
-casJobsId = casjobs.getSchemaName()
+casJobsId = cas.getSchemaName()
 print(casJobsId)
 
 
@@ -162,7 +153,7 @@ print(casJobsId)
 
 # get info about tables inside MyDB database context:
 
-tables = casjobs.getTables(context="MyDB")
+tables = cas.getTables(context="MyDB")
 print(tables)
 
 
@@ -170,7 +161,7 @@ print(tables)
 
 # execute a quick SQL query:
 
-df = casjobs.executeQuery(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase, outformat="pandas")
+df = cas.executeQuery(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase, outformat="pandas")
 print(df)
 
 
@@ -179,8 +170,8 @@ print(df)
 # submit a job, which inserts the query results into a table in the MyDB database context.
 # Wait until the job is done and get its status.
 
-jobId = casjobs.submitJob(sql=CasJobs_TestQuery + " into MyDB." + CasJobs_TestTableName1, context="MyDB")
-jobDescription = casjobs.waitForJob(jobId=jobId, verbose=False)
+jobId = cas.submitJob(sql=CasJobs_TestQuery + " into MyDB." + CasJobs_TestTableName1, context="MyDB")
+jobDescription = cas.waitForJob(jobId=jobId, verbose=False)
 print(jobId)
 print(jobDescription)
 
@@ -189,7 +180,7 @@ print(jobDescription)
 
 # drop or delete table in MyDB database context
 
-df = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName1, context="MyDB", outformat="pandas")
+df = cas.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName1, context="MyDB", outformat="pandas")
 print(df)
 
 
@@ -197,8 +188,8 @@ print(df)
 
 # get job status
 
-jobId = casjobs.submitJob(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase)
-jobDescription = casjobs.getJobStatus(jobId)
+jobId = cas.submitJob(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase)
+jobDescription = cas.getJobStatus(jobId)
 print(jobId)
 print(jobDescription)
 
@@ -207,8 +198,8 @@ print(jobDescription)
 
 # cancel a job
 
-jobId = casjobs.submitJob(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase)
-jobDescription = casjobs.cancelJob(jobId=jobId)
+jobId = cas.submitJob(sql=CasJobs_TestQuery, context=CasJobs_TestDatabase)
+jobDescription = cas.cancelJob(jobId=jobId)
 print(jobId)
 print(jobDescription)
 
@@ -217,7 +208,7 @@ print(jobDescription)
 
 # execute a query and write a local Fits file containing the query results:
 
-result = casjobs.writeFitsFileFromQuery(fileName=CasJobs_TestFitsFile, queryString=CasJobs_TestQuery, context="MyDB")
+result = cas.writeFitsFileFromQuery(fileName=CasJobs_TestFitsFile, queryString=CasJobs_TestQuery, context="MyDB")
 print(result)
 
 
@@ -232,7 +223,7 @@ os.remove(CasJobs_TestFitsFile)
 
 # get a Pandas dataframe containing the results of a query
 
-df = casjobs.getPandasDataFrameFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
+df = cas.getPandasDataFrameFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
 print(df)
 
 
@@ -240,7 +231,7 @@ print(df)
 
 # get numpy array containing the results of a query
 
-array = casjobs.getNumpyArrayFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
+array = cas.getNumpyArrayFromQuery(queryString=CasJobs_TestQuery, context=CasJobs_TestDatabase)
 print(array)
 
 
@@ -249,8 +240,8 @@ print(array)
 # uploads a Pandas dataframe into a Database table
 
 df = pandas.read_csv(StringIO(CasJobs_TestTableCSV), index_col=None)
-result = casjobs.uploadPandasDataFrameToTable(dataFrame=df, tableName=CasJobs_TestTableName2, context="MyDB")
-table = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
+result = cas.uploadPandasDataFrameToTable(dataFrame=df, tableName=CasJobs_TestTableName2, context="MyDB")
+table = cas.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
 print(result)
 print(table)
 
@@ -259,7 +250,7 @@ print(table)
 
 # drop or delete table just created:
 
-result2 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context=CasJobs_TestDatabase, outformat="pandas")
+result2 = cas.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context=CasJobs_TestDatabase, outformat="pandas")
 print(result2)
 
 
@@ -267,8 +258,8 @@ print(result2)
 
 # upload csv data string into a database table:
 
-result3 = casjobs.uploadCSVDataToTable(csvData=CasJobs_TestTableCSV, tableName=CasJobs_TestTableName2, context="MyDB")
-df2 = casjobs.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
+result3 = cas.uploadCSVDataToTable(csvData=CasJobs_TestTableCSV, tableName=CasJobs_TestTableName2, context="MyDB")
+df2 = cas.executeQuery(sql="select * from " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
 print(result3)
 print(df2)
 
@@ -277,7 +268,7 @@ print(df2)
 
 # drop or delete table just created:
 
-result4 = casjobs.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
+result4 = cas.executeQuery(sql="DROP TABLE " + CasJobs_TestTableName2, context="MyDB", outformat="pandas")
 print(result4)
 
 
@@ -305,7 +296,9 @@ SkyServer_DataRelease = "DR13"
 
 # Exectute sql query
 
-df = skyserver.sqlSearch(sql=SkyServer_TestQuery, dataRelease=SkyServer_DataRelease)
+sky = SkyServer()
+
+df = sky.sqlSearch(sql=SkyServer_TestQuery, dataRelease=SkyServer_DataRelease)
 print(df)
 
 
@@ -313,7 +306,7 @@ print(df)
 
 # get an image cutout
 
-img = skyserver.getJpegImgCutout(ra=197.614455642896, dec=18.438168853724, width=2, height=2, scale=0.4,
+img = sky.getJpegImgCutout(ra=197.614455642896, dec=18.438168853724, width=2, height=2, scale=0.4,
                                  dataRelease=SkyServer_DataRelease, opt="OG",
                                  query="SELECT TOP 100 p.objID, p.ra, p.dec, p.r FROM fGetObjFromRectEq(197.6,18.4,197.7,18.5) n, PhotoPrimary p WHERE n.objID=p.objID")
 plt.imshow(img)
@@ -323,7 +316,7 @@ plt.imshow(img)
 
 # do a radial search of objects:
 
-df = skyserver.radialSearch(ra=258.25, dec=64.05, radius=0.1, dataRelease=SkyServer_DataRelease)
+df = sky.radialSearch(ra=258.25, dec=64.05, radius=0.1, dataRelease=SkyServer_DataRelease)
 print(df)
 
 
@@ -331,7 +324,7 @@ print(df)
 
 # do rectangular search of objects:
 
-df = skyserver.rectangularSearch(min_ra=258.3, max_ra=258.31, min_dec=64, max_dec=64.01, dataRelease=SkyServer_DataRelease)
+df = sky.rectangularSearch(min_ra=258.3, max_ra=258.31, min_dec=64, max_dec=64.01, dataRelease=SkyServer_DataRelease)
 print(df)
 
 
@@ -339,7 +332,7 @@ print(df)
 
 # do an object search based on RA,Dec coordinates:
 
-object = skyserver.objectSearch(ra=258.25, dec=64.05, dataRelease=SkyServer_DataRelease)
+object = sky.objectSearch(ra=258.25, dec=64.05, dataRelease=SkyServer_DataRelease)
 print(object)
 
 
@@ -358,8 +351,9 @@ print(object)
 # In[ ]:
 
 # list content and metadata of top level directory in SciDrive
+sci = SciDrive()
 
-dirList = scidrive.directoryList("")
+dirList = sci.directoryList("")
 print(dirList)
 
 
@@ -377,7 +371,7 @@ SciDrive_FileContent = "Column1,Column2\n4.5,5.5\n"
 
 # create a folder or container in SciDrive
 
-responseCreate = scidrive.createContainer(SciDrive_Directory)
+responseCreate = sci.createContainer(SciDrive_Directory)
 print(responseCreate)
 
 
@@ -385,7 +379,7 @@ print(responseCreate)
 
 # list content and metadata of directory in SciDrive
 
-dirList = scidrive.directoryList(SciDrive_Directory)
+dirList = sci.directoryList(SciDrive_Directory)
 print(dirList)
 
 
@@ -393,7 +387,7 @@ print(dirList)
 
 # get the public url to access the directory content in SciDrive
 
-url = scidrive.publicUrl(SciDrive_Directory)
+url = sci.publicUrl(SciDrive_Directory)
 print(url)
 
 
@@ -401,7 +395,7 @@ print(url)
 
 # Delete folder or container in SciDrive:
 
-responseDelete = scidrive.delete(SciDrive_Directory)
+responseDelete = sci.delete(SciDrive_Directory)
 print(responseDelete)
 
 
@@ -418,7 +412,7 @@ file.close()
 
 # uploading a file to SciDrive:
 
-responseUpload = scidrive.upload(path=SciDrive_Directory + "/" + SciDrive_FileName, localFilePath=SciDrive_FilePath)
+responseUpload = sci.upload(path=SciDrive_Directory + "/" + SciDrive_FileName, localFilePath=SciDrive_FilePath)
 print(responseUpload)
 
 
@@ -426,7 +420,7 @@ print(responseUpload)
 
 # download file:
 
-stringio = scidrive.download(path=SciDrive_Directory + "/" + SciDrive_FileName, outformat="StringIO")
+stringio = sci.download(path=SciDrive_Directory + "/" + SciDrive_FileName, outformat="StringIO")
 fileContent = stringio.read()
 print(fileContent)
 
@@ -435,8 +429,8 @@ print(fileContent)
 
 # upload string data:
 
-responseUpload = scidrive.upload(path=SciDrive_Directory + "/" + SciDrive_FileName, data=SciDrive_FileContent)
-fileContent = scidrive.download(path=SciDrive_Directory + "/" + SciDrive_FileName, outformat="text")
+responseUpload = sci.upload(path=SciDrive_Directory + "/" + SciDrive_FileName, data=SciDrive_FileContent)
+fileContent = sci.download(path=SciDrive_Directory + "/" + SciDrive_FileName, outformat="text")
 print(fileContent)
 
 
@@ -444,7 +438,7 @@ print(fileContent)
 
 # delete folder in SciDrive:
 
-responseDelete = scidrive.delete(SciDrive_Directory)
+responseDelete = sci.delete(SciDrive_Directory)
 print(responseDelete)
 
 
@@ -470,8 +464,9 @@ os.remove(SciDrive_FilePath)
 # In[ ]:
 
 # list all databses or datasets available
+skyq = SkyQuery()
 
-datasets = skyquery.listAllDatasets()
+datasets = skyq.listAllDatasets()
 print(datasets)
 
 
@@ -479,7 +474,7 @@ print(datasets)
 
 # get info about the user's personal database or dataset
 
-info = skyquery.getDatasetInfo("MyDB")
+info = skyq.getDatasetInfo("MyDB")
 print(info)
 
 
@@ -487,7 +482,7 @@ print(info)
 
 # list tables inside dataset
 
-tables = skyquery.listDatasetTables("MyDB")
+tables = skyq.listDatasetTables("MyDB")
 print(tables)
 
 
@@ -495,7 +490,7 @@ print(tables)
 
 # list available job queues
 
-queueList = skyquery.listQueues()
+queueList = skyq.listQueues()
 print(queueList)
 
 
@@ -503,8 +498,8 @@ print(queueList)
 
 # list available job queues and related info
 
-quick = skyquery.getQueueInfo('quick')
-long = skyquery.getQueueInfo('long')
+quick = skyq.getQueueInfo('quick')
+long = skyq.getQueueInfo('long')
 print(quick)
 print(long)
 
@@ -520,7 +515,7 @@ SkyQuery_Query = "select 4.5 as Column1, 5.5 as Column2"
 
 # submit a query as a job
 
-jobId = skyquery.submitJob(query=SkyQuery_Query, queue="quick")
+jobId = skyq.submitJob(query=SkyQuery_Query, queue="quick")
 print(jobId)
 
 
@@ -528,8 +523,8 @@ print(jobId)
 
 # get status of a submitted job
 
-jobId = skyquery.submitJob(query=SkyQuery_Query, queue="quick")
-jobDescription = skyquery.getJobStatus(jobId=jobId)
+jobId = skyq.submitJob(query=SkyQuery_Query, queue="quick")
+jobDescription = skyq.getJobStatus(jobId=jobId)
 print(jobDescription)
 
 
@@ -537,8 +532,8 @@ print(jobDescription)
 
 # wait for a job to be finished and then get the status
 
-jobId = skyquery.submitJob(query=SkyQuery_Query, queue="quick")
-jobDescription = skyquery.waitForJob(jobId=jobId, verbose=True)
+jobId = skyq.submitJob(query=SkyQuery_Query, queue="quick")
+jobDescription = skyq.waitForJob(jobId=jobId, verbose=True)
 print("jobDescription=")
 print(jobDescription)
 
@@ -547,19 +542,19 @@ print(jobDescription)
 
 # cancel a job that is running, and then get its status
 
-jobId = skyquery.submitJob(query=SkyQuery_Query, queue="long")
-isCanceled = skyquery.cancelJob(jobId)
+jobId = skyq.submitJob(query=SkyQuery_Query, queue="long")
+isCanceled = skyq.cancelJob(jobId)
 print(isCanceled)
 print("job status:")
-print(skyquery.getJobStatus(jobId=jobId))
+print(skyq.getJobStatus(jobId=jobId))
 
 
 # In[ ]:
 
 # get list of jobs
 
-quickJobsList = skyquery.listJobs('quick')
-longJobsList = skyquery.listJobs('long')
+quickJobsList = skyq.listJobs('quick')
+longJobsList = skyq.listJobs('long')
 print(quickJobsList)
 print(longJobsList)
 
@@ -576,7 +571,7 @@ SkyQuery_TestTableCSV = u"Column1,Column2\n4.5,5.5\n"
 
 # uploading the csv table:
 
-result = skyquery.uploadTable(uploadData=SkyQuery_TestTableCSV, tableName=SkyQuery_TestTableName, datasetName="MyDB", informat="csv")
+result = skyq.uploadTable(uploadData=SkyQuery_TestTableCSV, tableName=SkyQuery_TestTableName, datasetName="MyDB", informat="csv")
 print(result)
 
 
@@ -584,7 +579,7 @@ print(result)
 
 # downloading table:
 
-table = skyquery.getTable(tableName=SkyQuery_TestTableName, datasetName="MyDB", top=10)
+table = skyq.getTable(tableName=SkyQuery_TestTableName, datasetName="MyDB", top=10)
 print(table)
 
 
@@ -592,7 +587,7 @@ print(table)
 
 # list tables inside dataset
 
-tables = skyquery.listDatasetTables("MyDB")
+tables = skyq.listDatasetTables("MyDB")
 print(tables)
 
 
@@ -600,7 +595,7 @@ print(tables)
 
 # get dataset table info:
 
-info = skyquery.getTableInfo(tableName="webuser." + SkyQuery_TestTableName, datasetName="MyDB")
+info = skyq.getTableInfo(tableName="webuser." + SkyQuery_TestTableName, datasetName="MyDB")
 print(info)
 
 
@@ -608,7 +603,7 @@ print(info)
 
 # get dataset table columns info
 
-columns = skyquery.listTableColumns(tableName="webuser." + SkyQuery_TestTableName, datasetName="MyDB")
+columns = skyq.listTableColumns(tableName="webuser." + SkyQuery_TestTableName, datasetName="MyDB")
 print(columns)
 
 
@@ -616,6 +611,6 @@ print(columns)
 
 # drop (or delete) table from dataset.
 
-result = skyquery.dropTable(tableName=SkyQuery_TestTableName, datasetName="MyDB")
+result = skyq.dropTable(tableName=SkyQuery_TestTableName, datasetName="MyDB")
 print(result)
 
