@@ -6,10 +6,9 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 14:10:11
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 09:30:09
+# @Last Modified time: 2017-08-30 09:48:56
 
 from __future__ import print_function, division, absolute_import
-from sciserver.casjobs import CasJobs
 import pytest
 import os
 import pandas
