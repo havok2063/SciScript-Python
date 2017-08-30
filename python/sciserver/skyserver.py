@@ -6,14 +6,14 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:25:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:54:05
+# @Last Modified time: 2017-08-30 14:46:07
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
 import pandas
 import skimage.io
 from sciserver import config
-from sciserver.utils import send_request
+from sciserver.utils import send_request, Task
 
 
 class SkyServer(object):
@@ -81,10 +81,8 @@ class SkyServer(object):
 
         # Append the task name
         if taskname:
-            if config.isSciServerComputeEnvironment():
-                url = "{0}TaskName=Compute.SciScript-Python.SkyServer.{1}&".format(url, taskname)
-            else:
-                url = "{0}TaskName=SciScript-Python.SkyServer.{1}&".format(url, taskname)
+            task = Task(taskname, use_base=True)
+            url = '{0}{1}&'.format(url, task.name)
 
         return url
 

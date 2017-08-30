@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:54:27
+# @Last Modified time: 2017-08-30 14:45:56
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -17,7 +17,7 @@ import pandas
 import os
 from sciserver import config
 from sciserver.authentication import Authentication
-from sciserver.utils import checkAuth, send_request
+from sciserver.utils import checkAuth, send_request, Task
 
 
 class CasJobs(object):
@@ -33,11 +33,8 @@ class CasJobs(object):
         return uri
 
     def get_taskname(self, name):
-        if config.isSciServerComputeEnvironment():
-            TaskName = "Compute.SciScript-Python.CasJobs.{0}".format(name)
-        else:
-            TaskName = "SciScript-Python.CasJobs.{0}".format(name)
-        return TaskName
+        task = Task(name, use_base=True)
+        return task.name
 
     @checkAuth
     def getSchemaName(self):

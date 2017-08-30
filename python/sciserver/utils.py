@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 22:12:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-13 18:02:20
+# @Last Modified time: 2017-08-30 14:36:18
 
 from __future__ import print_function, division, absolute_import
 from functools import wraps
@@ -160,3 +160,29 @@ def send_request(url, reqtype='get', data=None, content_type='application/json',
     else:
         resp = check_response(response, errmsg=errmsg)
         return resp
+
+
+class Task(object):
+    ''' This class describes a SciServer Task '''
+
+    def __init__(self, name=None, use_base=None):
+        self.use_base = use_base
+        self.set_name(name)
+
+    @property
+    def base_name(self):
+        if config.isSciServerComputeEnvironment():
+            base = "Compute.SciScript-Python.SciDrive"
+        else:
+            base = "SciScript-Python.SciDrive"
+        return base
+
+    def set_name(self, name):
+        if name:
+            if self.use_base:
+                self.name = '{0}.{1}'.format(self.base_name, name)
+            else:
+                self.name = name
+        else:
+            self.name = self.base_name
+
