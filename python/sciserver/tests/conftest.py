@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:24:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 09:57:16
+# @Last Modified time: 2017-08-30 10:26:30
 
 from __future__ import print_function, division, absolute_import
 import pytest
@@ -16,6 +16,7 @@ from sciserver.authentication import Authentication
 from sciserver.loginportal import LoginPortal
 from sciserver.casjobs import CasJobs
 from sciserver.scidrive import SciDrive
+from sciserver.skyserver import SkyServer
 
 
 userinfo = [('testuser', 'testpass')]
@@ -55,6 +56,13 @@ def sci():
     sci = SciDrive()
     yield sci
     sci = None
+
+
+@pytest.fixture(scope='session')
+def sky():
+    sky = SkyServer()
+    yield sky
+    sky = None
 
 
 @pytest.fixture(scope='session')
