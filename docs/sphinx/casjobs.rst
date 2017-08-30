@@ -17,7 +17,10 @@ Some features of this application include:
 
 Casjobs includes an API to allow for programmatic access your catalog data.  Check out the :download:`CasJobs REST API<CasJobs_REST_API.pdf>` for a full description of the routes available.
 
-.. _sciserver_casjobs_api
+Getting Started
+^^^^^^^^^^^^^^^
+
+.. _sciserver_casjobs_api:
 
 Reference/API
 ^^^^^^^^^^^^^

@@ -54,7 +54,7 @@ before_script:
 - export PYTHONPATH=$PYTHONPATH:$TRAVIS_BUILD_DIR/python
 
 script:
-- pytest -s -v python/sciserver/tests --cov python/sciserver --cov-report html -W ignore::DeprecationWarning
+- pytest python/sciserver/tests --cov python/sciserver --cov-report html -W ignore::DeprecationWarning
 
 after_success:
 - coveralls

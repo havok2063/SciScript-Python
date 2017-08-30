@@ -25,6 +25,9 @@ Components
    :maxdepth: 1
 
    casjobs
+   scidrive
+   skyquery
+   skyserver
 
 Documentation
 =============
