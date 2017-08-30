@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 09:31:24
+# @Last Modified time: 2017-08-30 09:34:53
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -63,7 +63,7 @@ class CasJobs(object):
 
         auth = Authentication(token=config.token)
         keystoneUserId = auth.getKeystoneUserWithToken().userid
-        #usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
+
         usersUrl = self.make_uri(os.path.join('users', keystoneUserId))
 
         response = send_request(usersUrl, content_type='application/json',
@@ -97,7 +97,6 @@ class CasJobs(object):
 
         """
 
-        #TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
         tablesUrl = self.make_uri(os.path.join(context, 'Tables'), base=self.contextURI)
 
         response = send_request(tablesUrl, content_type='application/json',
@@ -153,14 +152,9 @@ class CasJobs(object):
         else:
             raise Exception("Error when executing query. Illegal format parameter specification: {0}".format(outformat))
 
-        #QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/query"
         QueryUrl = self.make_uri(os.path.join(context, 'query'), base=self.contextURI)
 
         TaskName = self.get_taskname('executeQuery')
-        # if config.isSciServerComputeEnvironment():
-        #     TaskName = "Compute.SciScript-Python.CasJobs.executeQuery"
-        # else:
-        #     TaskName = "SciScript-Python.CasJobs.executeQuery"
 
         query = {"Query": sql, "TaskName": TaskName}
 
@@ -214,14 +208,9 @@ class CasJobs(object):
 
         """
 
-        #QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
         QueryUrl = self.make_uri(os.path.join(context, 'jobs'), base=self.contextURI)
 
         TaskName = self.get_taskname('submitJob')
-        # if config.isSciServerComputeEnvironment():
-        #     TaskName = "Compute.SciScript-Python.CasJobs.submitJob"
-        # else:
-        #     TaskName = "SciScript-Python.CasJobs.submitJob"
 
         query = {"Query": sql, "TaskName": TaskName}
 
@@ -262,7 +251,6 @@ class CasJobs(object):
 
         """
 
-        #QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
         QueryUrl = self.make_uri(os.path.join('jobs', str(jobId)))
 
         response = send_request(QueryUrl, content_type='application/json',
@@ -293,7 +281,6 @@ class CasJobs(object):
 
         """
 
-        #QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
         QueryUrl = self.make_uri(os.path.join('jobs', str(jobId)))
 
         response = send_request(QueryUrl, reqtype='delete', content_type='application/json',
@@ -533,7 +520,6 @@ class CasJobs(object):
 
         """
 
-        #tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName
         tablesUrl = self.make_uri(os.path.join(context, 'Tables', tableName), base=self.contextURI)
 
         postResponse = send_request(tablesUrl, reqtype='post', data=csvData, stream=True,
