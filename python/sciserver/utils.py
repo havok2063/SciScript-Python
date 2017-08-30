@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 22:12:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 14:36:18
+# @Last Modified time: 2017-08-30 14:50:17
 
 from __future__ import print_function, division, absolute_import
 from functools import wraps
@@ -165,16 +165,17 @@ def send_request(url, reqtype='get', data=None, content_type='application/json',
 class Task(object):
     ''' This class describes a SciServer Task '''
 
-    def __init__(self, name=None, use_base=None):
+    def __init__(self, name=None, use_base=None, component='SciServer'):
         self.use_base = use_base
+        self.component = component
         self.set_name(name)
 
     @property
     def base_name(self):
         if config.isSciServerComputeEnvironment():
-            base = "Compute.SciScript-Python.SciDrive"
+            base = "Compute.SciScript-Python.{0}".format(self.component)
         else:
-            base = "SciScript-Python.SciDrive"
+            base = "SciScript-Python.{0}".format(self.component)
         return base
 
     def set_name(self, name):

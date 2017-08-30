@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 14:45:56
+# @Last Modified time: 2017-08-30 14:50:33
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -33,7 +33,7 @@ class CasJobs(object):
         return uri
 
     def get_taskname(self, name):
-        task = Task(name, use_base=True)
+        task = Task(name, use_base=True, component='CasJobs')
         return task.name
 
     @checkAuth

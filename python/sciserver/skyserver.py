@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 16:25:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 14:46:07
+# @Last Modified time: 2017-08-30 14:50:47
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -81,7 +81,7 @@ class SkyServer(object):
 
         # Append the task name
         if taskname:
-            task = Task(taskname, use_base=True)
+            task = Task(taskname, use_base=True, component='SkyServer')
             url = '{0}{1}&'.format(url, task.name)
 
         return url
