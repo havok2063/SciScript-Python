@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-29 11:46:52
+# @Last Modified time: 2017-08-30 09:31:24
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -14,516 +14,531 @@ import json
 import time
 import requests as requests
 import pandas
+import os
 from sciserver import config
 from sciserver.authentication import Authentication
 from sciserver.utils import checkAuth, send_request
 
 
-@checkAuth
-def getSchemaName():
-    """ Returns an id for a database schema
+class CasJobs(object):
+    ''' '''
 
-    Returns the WebServiceID that identifies the schema for a
-    user in MyScratch database with CasJobs.
+    def __init__(self):
+        self.baseURI = config.CasJobsRESTUri
+        self.contextURI = self.make_uri('contexts')
 
-    Returns:
-        id (str):
-            the WebServerID of the user
+    def make_uri(self, path, base=None):
+        base = base if base else self.baseURI
+        uri = os.path.join(base, path)
+        return uri
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+    def get_taskname(self, name):
+        if config.isSciServerComputeEnvironment():
+            TaskName = "Compute.SciScript-Python.CasJobs.{0}".format(name)
+        else:
+            TaskName = "SciScript-Python.CasJobs.{0}".format(name)
+        return TaskName
 
-    Example:
-        >>> wsid = CasJobs.getSchemaName()
+    @checkAuth
+    def getSchemaName(self):
+        """ Returns an id for a database schema
 
-    See Also:
-        CasJobs.getTables.
+        Returns the WebServiceID that identifies the schema for a
+        user in MyScratch database with CasJobs.
 
-    """
+        Returns:
+            id (str):
+                the WebServerID of the user
 
-    auth = Authentication(token=config.token)
-    keystoneUserId = auth.getKeystoneUserWithToken().userid
-    usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    response = send_request(usersUrl, content_type='application/json',
-                            errmsg='Error when getting schema name')
-    if response.ok:
-        jsonResponse = json.loads(response.content.decode())
-        return "wsid_" + str(jsonResponse["WebServicesId"])
+        Example:
+            >>> wsid = CasJobs.getSchemaName()
 
+        See Also:
+            CasJobs.getTables.
 
-@checkAuth
-def getTables(context="MyDB"):
-    """ Gets the info for all tables in a db
+        """
 
-    Gets the names, size and creation date of all tables in a
-    database context that the user has access to.
+        auth = Authentication(token=config.token)
+        keystoneUserId = auth.getKeystoneUserWithToken().userid
+        #usersUrl = config.CasJobsRESTUri + "/users/" + keystoneUserId
+        usersUrl = self.make_uri(os.path.join('users', keystoneUserId))
 
-    Parameters:
-        context (str):
-            the database context string (i.e. name of the db)
-
-    Returns:
-        a JSON object with format [{"Date":seconds,"Name":"TableName","Rows":int,"Size",int},..]
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> tables = CasJobs.getTables("MyDB")
-
-    See Also:
-        CasJobs.getSchemaName.
-
-    """
-
-    TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
-
-    response = send_request(TablesUrl, content_type='application/json',
-                            errmsg='Error when getting table description from database')
-
-    if response.ok:
-        jsonResponse = json.loads(response.content.decode())
-        return jsonResponse
-
-
-def executeQuery(sql, context="MyDB", outformat="pandas"):
-    """
-    Executes a synchronous SQL query in a CasJobs database context.
-
-    Parameters:
-        sql (str):
-            the sql query string
-        context (str):
-            the database context string (i.e. name of the db)
-        outformat (str):
-            the format of return output type. Default is Pandas dataframe.
-            Options are:
-            \t\t'pandas': pandas.DataFrame.\n
-            \t\t'json': a JSON string containing the query results. \n
-            \t\t'dict': a dictionary created from the JSON string containing the query results.\n
-            \t\t'csv': a csv string.\n
-            \t\t'readable': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
-            \t\t'StringIO': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
-            \t\t'fits': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
-            \t\t'BytesIO': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
-
-    Returns:
-        The query result table, in the format specified
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> table = CasJobs.executeQuery(sql="select 1 as foo, 2 as bar",format="pandas", context="MyDB")
-
-    See Also:
-        CasJobs.submitJob, CasJobs.getTables, SkyServer.sqlSearch
-
-    """
-
-    if (outformat == "pandas") or (outformat == "json") or (outformat == "dict"):
-        acceptHeader = "application/json+array"
-    elif (outformat == "csv") or (outformat == "readable") or (outformat == "StringIO"):
-        acceptHeader = "text/plain"
-    elif outformat == "fits":
-        acceptHeader = "application/fits"
-    elif outformat == "BytesIO":
-        acceptHeader = "application/fits"  # defined later using specific serialization
-    else:
-        raise Exception("Error when executing query. Illegal format parameter specification: {0}".format(outformat))
-
-    QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/query"
-
-    TaskName = ""
-    if config.isSciServerComputeEnvironment():
-        TaskName = "Compute.SciScript-Python.CasJobs.executeQuery"
-    else:
-        TaskName = "SciScript-Python.CasJobs.executeQuery"
-
-    query = {"Query": sql, "TaskName": TaskName}
-
-    data = json.dumps(query).encode()
-
-    postResponse = send_request(QueryUrl, reqtype='post', data=data, stream=True,
-                                content_type='application/json', acceptHeader=acceptHeader,
+        response = send_request(usersUrl, content_type='application/json',
                                 errmsg='Error when getting schema name')
+        if response.ok:
+            jsonResponse = json.loads(response.content.decode())
+            return "wsid_" + str(jsonResponse["WebServicesId"])
 
-    if postResponse.ok:
-        if (outformat == "readable") or (outformat == "StringIO"):
-            return StringIO(postResponse.content.decode())
-        elif outformat == "pandas":
-            r = json.loads(postResponse.content.decode())
-            return pandas.DataFrame(r['Result'][0]['Data'], columns=r['Result'][0]['Columns'])
-        elif outformat == "csv":
-            return postResponse.content.decode()
-        elif outformat == "dict":
-            return json.loads(postResponse.content.decode())
-        elif outformat == "json":
-            return postResponse.content.decode()
+    @checkAuth
+    def getTables(self, context="MyDB"):
+        """ Gets the info for all tables in a db
+
+        Gets the names, size and creation date of all tables in a
+        database context that the user has access to.
+
+        Parameters:
+            context (str):
+                the database context string (i.e. name of the db)
+
+        Returns:
+            a JSON object with format [{"Date":seconds,"Name":"TableName","Rows":int,"Size",int},..]
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> tables = CasJobs.getTables("MyDB")
+
+        See Also:
+            CasJobs.getSchemaName.
+
+        """
+
+        #TablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables"
+        tablesUrl = self.make_uri(os.path.join(context, 'Tables'), base=self.contextURI)
+
+        response = send_request(tablesUrl, content_type='application/json',
+                                errmsg='Error when getting table description from database')
+
+        if response.ok:
+            jsonResponse = json.loads(response.content.decode())
+            return jsonResponse
+
+    def executeQuery(self, sql, context="MyDB", outformat="pandas"):
+        """
+        Executes a synchronous SQL query in a CasJobs database context.
+
+        Parameters:
+            sql (str):
+                the sql query string
+            context (str):
+                the database context string (i.e. name of the db)
+            outformat (str):
+                the format of return output type. Default is Pandas dataframe.
+                Options are:
+                \t\t'pandas': pandas.DataFrame.\n
+                \t\t'json': a JSON string containing the query results. \n
+                \t\t'dict': a dictionary created from the JSON string containing the query results.\n
+                \t\t'csv': a csv string.\n
+                \t\t'readable': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
+                \t\t'StringIO': an object of type io.StringIO, which has the .read() method and wraps a csv string that can be passed into pandas.read_csv for example.\n
+                \t\t'fits': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
+                \t\t'BytesIO': an object of type io.BytesIO, which has the .read() method and wraps the result in fits format.\n
+
+        Returns:
+            The query result table, in the format specified
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> table = CasJobs.executeQuery(sql="select 1 as foo, 2 as bar",format="pandas", context="MyDB")
+
+        See Also:
+            CasJobs.submitJob, CasJobs.getTables, SkyServer.sqlSearch
+
+        """
+
+        if (outformat == "pandas") or (outformat == "json") or (outformat == "dict"):
+            acceptHeader = "application/json+array"
+        elif (outformat == "csv") or (outformat == "readable") or (outformat == "StringIO"):
+            acceptHeader = "text/plain"
         elif outformat == "fits":
-            return BytesIO(postResponse.content)
+            acceptHeader = "application/fits"
         elif outformat == "BytesIO":
-            return BytesIO(postResponse.content)
-        else:  # should not occur
+            acceptHeader = "application/fits"  # defined later using specific serialization
+        else:
             raise Exception("Error when executing query. Illegal format parameter specification: {0}".format(outformat))
 
+        #QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/query"
+        QueryUrl = self.make_uri(os.path.join(context, 'query'), base=self.contextURI)
 
-@checkAuth
-def submitJob(sql, context="MyDB"):
-    """
-    Submits an asynchronous SQL query to the CasJobs queue.
+        TaskName = self.get_taskname('executeQuery')
+        # if config.isSciServerComputeEnvironment():
+        #     TaskName = "Compute.SciScript-Python.CasJobs.executeQuery"
+        # else:
+        #     TaskName = "SciScript-Python.CasJobs.executeQuery"
 
-    Parameters:
-        sql (str):
-            the sql query string
-        context (str):
-            the database context string (i.e. name of the db)
+        query = {"Query": sql, "TaskName": TaskName}
 
-    Returns:
-        The CasJobs job id
+        data = json.dumps(query).encode()
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+        postResponse = send_request(QueryUrl, reqtype='post', data=data, stream=True,
+                                    content_type='application/json', acceptHeader=acceptHeader,
+                                    errmsg='Error when getting schema name')
 
-    Example:
-        >>> jobid = CasJobs.submitJob("select 1 as foo","MyDB")
+        if postResponse.ok:
+            if (outformat == "readable") or (outformat == "StringIO"):
+                return StringIO(postResponse.content.decode())
+            elif outformat == "pandas":
+                r = json.loads(postResponse.content.decode())
+                return pandas.DataFrame(r['Result'][0]['Data'], columns=r['Result'][0]['Columns'])
+            elif outformat == "csv":
+                return postResponse.content.decode()
+            elif outformat == "dict":
+                return json.loads(postResponse.content.decode())
+            elif outformat == "json":
+                return postResponse.content.decode()
+            elif outformat == "fits":
+                return BytesIO(postResponse.content)
+            elif outformat == "BytesIO":
+                return BytesIO(postResponse.content)
+            else:  # should not occur
+                raise Exception("Error when executing query. Illegal format parameter specification: {0}".format(outformat))
 
-    See Also:
-        CasJobs.executeQuery, CasJobs.getJobStatus, CasJobs.waitForJob, CasJobs.cancelJob.
+    @checkAuth
+    def submitJob(self, sql, context="MyDB"):
+        """
+        Submits an asynchronous SQL query to the CasJobs queue.
 
-    """
+        Parameters:
+            sql (str):
+                the sql query string
+            context (str):
+                the database context string (i.e. name of the db)
 
-    QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
+        Returns:
+            The CasJobs job id
 
-    TaskName = ""
-    if config.isSciServerComputeEnvironment():
-        TaskName = "Compute.SciScript-Python.CasJobs.submitJob"
-    else:
-        TaskName = "SciScript-Python.CasJobs.submitJob"
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    query = {"Query": sql, "TaskName": TaskName}
+        Example:
+            >>> jobid = CasJobs.submitJob("select 1 as foo","MyDB")
 
-    data = json.dumps(query).encode()
+        See Also:
+            CasJobs.executeQuery, CasJobs.getJobStatus, CasJobs.waitForJob, CasJobs.cancelJob.
 
-    response = send_request(QueryUrl, reqtype='put', data=data,
-                            content_type='application/json', acceptHeader='text/plain',
-                            errmsg='Error when getting schema name')
+        """
 
-    if response.ok:
-        return int(response.content.decode())
+        #QueryUrl = config.CasJobsRESTUri + "/contexts/" + context + "/jobs"
+        QueryUrl = self.make_uri(os.path.join(context, 'jobs'), base=self.contextURI)
 
+        TaskName = self.get_taskname('submitJob')
+        # if config.isSciServerComputeEnvironment():
+        #     TaskName = "Compute.SciScript-Python.CasJobs.submitJob"
+        # else:
+        #     TaskName = "SciScript-Python.CasJobs.submitJob"
 
-@checkAuth
-def getJobStatus(jobId):
-    """ Get a job status
+        query = {"Query": sql, "TaskName": TaskName}
 
-    Shows the status of a job submitted to CasJobs.
+        data = json.dumps(query).encode()
 
-    Parameters:
-        jobId (int):
-            the id of the submitted job
+        response = send_request(QueryUrl, reqtype='put', data=data,
+                                content_type='application/json', acceptHeader='text/plain',
+                                errmsg='Error when getting schema name')
 
-    Returns:
-        a dictionary containing the job status and related metadata.
+        if response.ok:
+            return int(response.content.decode())
 
-        The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling),
-        3(Canceled), 4 (Failed) or 5 (Finished). If jobId is the empty string, then returns a list
-        with the statuses of all previous jobs.
+    @checkAuth
+    def getJobStatus(self, jobId):
+        """ Get a job status
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+        Shows the status of a job submitted to CasJobs.
 
-    Example:
-        >>> status = CasJobs.getJobStatus(CasJobs.submitJob("select 1"))
+        Parameters:
+            jobId (int):
+                the id of the submitted job
 
-    See Also:
-        CasJobs.submitJob, CasJobs.waitForJob, CasJobs.cancelJob.
+        Returns:
+            a dictionary containing the job status and related metadata.
 
-    """
+            The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling),
+            3(Canceled), 4 (Failed) or 5 (Finished). If jobId is the empty string, then returns a list
+            with the statuses of all previous jobs.
 
-    QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    response = send_request(QueryUrl, content_type='application/json',
-                            errmsg='Error when getting the status of job {0}'.format(jobId))
-    if response.ok:
-        return json.loads(response.content.decode())
+        Example:
+            >>> status = CasJobs.getJobStatus(CasJobs.submitJob("select 1"))
 
+        See Also:
+            CasJobs.submitJob, CasJobs.waitForJob, CasJobs.cancelJob.
 
-@checkAuth
-def cancelJob(jobId):
-    """
-    Cancels a job already submitted.
+        """
 
-    Parameters:
-        jobId (int):
-            the id of the submitted job
+        #QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+        QueryUrl = self.make_uri(os.path.join('jobs', str(jobId)))
 
-    Returns:
-        True if the job was canceled successfully
+        response = send_request(QueryUrl, content_type='application/json',
+                                errmsg='Error when getting the status of job {0}'.format(jobId))
+        if response.ok:
+            return json.loads(response.content.decode())
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+    @checkAuth
+    def cancelJob(self, jobId):
+        """
+        Cancels a job already submitted.
 
-    Example:
-        >>> response = CasJobs.cancelJob(CasJobs.submitJob("select 1"))
+        Parameters:
+            jobId (int):
+                the id of the submitted job
 
-    See Also:
-        CasJobs.submitJob, CasJobs.waitForJob
+        Returns:
+            True if the job was canceled successfully
 
-    """
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+        Example:
+            >>> response = CasJobs.cancelJob(CasJobs.submitJob("select 1"))
 
-    response = send_request(QueryUrl, reqtype='delete', content_type='application/json',
-                            errmsg='Error when canceling job {0}'.format(jobId))
-    if response.ok:
-        return True  # json.loads(response.content)
+        See Also:
+            CasJobs.submitJob, CasJobs.waitForJob
 
+        """
 
-def waitForJob(jobId, verbose=True):
-    """ Waits for a job to finish
+        #QueryUrl = config.CasJobsRESTUri + "/jobs/" + str(jobId)
+        QueryUrl = self.make_uri(os.path.join('jobs', str(jobId)))
 
-    Queries the job status from casjobs every 2 seconds and waits for the
-    casjobs job to return a status of 3, 4, or 5 (Cancelled, Failed or
-    Finished, respectively).
+        response = send_request(QueryUrl, reqtype='delete', content_type='application/json',
+                                errmsg='Error when canceling job {0}'.format(jobId))
+        if response.ok:
+            return True  # json.loads(response.content)
 
-    Parameters:
-        jobId (int):
-            the id of the submitted job
-        verbose (bool):
-            If True, prints 'wait' messages to the screen
+    def waitForJob(self, jobId, verbose=True):
+        """ Waits for a job to finish
 
-    Returns:
-        a dictonary containing the job status and related metadata
+        Queries the job status from casjobs every 2 seconds and waits for the
+        casjobs job to return a status of 3, 4, or 5 (Cancelled, Failed or
+        Finished, respectively).
 
-        The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling), 3(Canceled), 4 (Failed) or 5 (Finished).
+        Parameters:
+            jobId (int):
+                the id of the submitted job
+            verbose (bool):
+                If True, prints 'wait' messages to the screen
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+        Returns:
+            a dictonary containing the job status and related metadata
 
-    Example:
-        >>> CasJobs.waitForJob(CasJobs.submitJob("select 1"))
+            The "Status" field can be equal to 0 (Ready), 1 (Started), 2 (Canceling), 3(Canceled), 4 (Failed) or 5 (Finished).
 
-    See Also:
-        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.cancelJob
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    """
+        Example:
+            >>> CasJobs.waitForJob(CasJobs.submitJob("select 1"))
 
-    try:
-        complete = False
+        See Also:
+            CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.cancelJob
 
-        waitingStr = "Waiting..."
-        back = "\b" * len(waitingStr)
-        if verbose:
-            print(waitingStr, end="")
+        """
 
-        while not complete:
+        try:
+            complete = False
+
+            waitingStr = "Waiting..."
+            back = "\b" * len(waitingStr)
             if verbose:
                 print(waitingStr, end="")
-            jobDesc = getJobStatus(jobId)
-            jobStatus = int(jobDesc["Status"])
-            if jobStatus in (3, 4, 5):
-                complete = True
+
+            while not complete:
                 if verbose:
-                    print("Done!")
+                    print(waitingStr, end="")
+                jobDesc = self.getJobStatus(jobId)
+                jobStatus = int(jobDesc["Status"])
+                if jobStatus in (3, 4, 5):
+                    complete = True
+                    if verbose:
+                        print("Done!")
+                else:
+                    time.sleep(2)
+
+            return jobDesc
+        except Exception as e:
+            raise e
+
+    def writeFitsFileFromQuery(self, fileName, queryString, context="MyDB"):
+        """ Performs a quick query and writes a FITS file
+
+        Executes a quick CasJobs query and writes the result to a local Fits file
+        (http://www.stsci.edu/institute/software_hardware/pyfits).
+
+        Parameters:
+            fileName (str):
+                path to the local Fits file to be created
+            queryString (str):
+                the sql query string
+            context (str):
+                the name of the db
+
+        Returns:
+            True if the FITS file was created successfully
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> CasJobs.writeFitsFileFromQuery("/home/user/myFile.fits","select 1 as foo")
+
+        See Also:
+            CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+            CasJobs.getPandasDataFrameFromQuery, CasJobs.getNumpyArrayFromQuery
+
+        """
+        try:
+            bytesio = self.executeQuery(queryString, context=context, outformat="fits")
+
+            theFile = open(fileName, "w+b")
+            theFile.write(bytesio.read())
+            theFile.close()
+
+            return True
+
+        except Exception as e:
+            raise e
+
+    def getPandasDataFrameFromQuery(self, queryString, context="MyDB"):
+        """ Performs a quick query and outputs a Pandas dataframe
+
+        Executes a casjobs quick query and returns the result as a
+        pandas dataframe object with an index
+        (http://pandas.pydata.org/pandas-docs/stable/).
+
+        Parameters:
+            queryString (str):
+                the sql query string
+            context (str):
+                the name of the db
+
+        Returns:
+            a Pandas dataframe containing the results table
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> df = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB")
+
+        See Also:
+            CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+            CasJobs.writeFitsFileFromQuery, CasJobs.getNumpyArrayFromQuery
+
+        """
+        try:
+            cvsResponse = self.executeQuery(queryString, context=context, outformat="readable")
+
+            # if the index column is not specified then it will add it's own column which causes
+            # problems when uploading the transformed data
+            dataFrame = pandas.read_csv(cvsResponse, index_col=None)
+
+            return dataFrame
+
+        except Exception as e:
+            raise e
+
+    def getNumpyArrayFromQuery(self, queryString, context="MyDB"):
+        """ Performs a quick query and outputs a numpy array
+
+        Executes a casjobs query and returns the results table as a Numpy array
+        (http://docs.scipy.org/doc/numpy/).
+
+        Parameters:
+            queryString (str):
+                the sql query string
+            context (str):
+                the name of the db
+
+        Returns:
+            a Numpy array storing the results table
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> array = CasJobs.getNumpyArrayFromQuery("select 1 as foo", context="MyDB")
+
+        See Also:
+            CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
+            CasJobs.writeFitsFileFromQuery, CasJobs.getPandasDataFrameFromQuery
+
+        """
+        try:
+
+            dataFrame = self.getPandasDataFrameFromQuery(queryString, context)
+            return dataFrame.as_matrix()
+
+        except Exception as e:
+            raise e
+
+    def uploadPandasDataFrameToTable(self, dataFrame, tableName, context="MyDB"):
+        """ Upload a Pandas dataframe
+
+        Uploads a pandas dataframe object into a CasJobs table.
+        If the dataframe contains a named index, then the index will be uploaded as
+        a column as well.
+
+        Parameters:
+            dataFrame:
+                Pandas data frame containg the data (pandas.core.frame.DataFrame)
+            tableName (str):
+                the name of the CasJobs table to be created
+            context (str):
+                the name of the db
+
+        Returns:
+            True if the dataframe was uploaded successfully
+
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
+
+        Example:
+            >>> response = CasJobs.uploadPandasDataFrameToTable(CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB"), "NewTableFromDataFrame")
+
+        See Also:
+            CasJobs.uploadCSVDataToTable
+
+        """
+        try:
+            if dataFrame.index.name is not None and dataFrame.index.name != "":
+                sio = dataFrame.to_csv().encode("utf8")
             else:
-                time.sleep(2)
+                sio = dataFrame.to_csv(index_label=False, index=False).encode("utf8")
 
-        return jobDesc
-    except Exception as e:
-        raise e
+            return self.uploadCSVDataToTable(sio, tableName, context)
 
+        except Exception as e:
+            raise e
 
-def writeFitsFileFromQuery(fileName, queryString, context="MyDB"):
-    """ Performs a quick query and writes a FITS file
+    @checkAuth
+    def uploadCSVDataToTable(self, csvData, tableName, context="MyDB"):
+        """
+        Uploads CSV data into a CasJobs table.
 
-    Executes a quick CasJobs query and writes the result to a local Fits file
-    (http://www.stsci.edu/institute/software_hardware/pyfits).
+        Parameters:
+            csvData:
+                a CSV table in string format.
+            tableName (str):
+                the name of the CasJobs table to be created
+            context (str):
+                the name of the db
 
-    Parameters:
-        fileName (str):
-            path to the local Fits file to be created
-        queryString (str):
-            the sql query string
-        context (str):
-            the name of the db
+        Returns:
+            True if the csv data was uploaded successfully
 
-    Returns:
-        True if the FITS file was created successfully
+        Raises:
+            Throws an exception if the HTTP request to the CasJobs API returns an error.
 
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
+        Example:
+            >>> csv = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB").to_csv().encode("utf8"); response = CasJobs.uploadCSVDataToTable(csv, "NewTableFromDataFrame")
 
-    Example:
-        >>> CasJobs.writeFitsFileFromQuery("/home/user/myFile.fits","select 1 as foo")
+        See Also:
+            CasJobs.uploadPandasDataFrameToTable
 
-    See Also:
-        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
-        CasJobs.getPandasDataFrameFromQuery, CasJobs.getNumpyArrayFromQuery
+        """
 
-    """
-    try:
-        bytesio = executeQuery(queryString, context=context, outformat="fits")
+        #tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName
+        tablesUrl = self.make_uri(os.path.join(context, 'Tables', tableName), base=self.contextURI)
 
-        theFile = open(fileName, "w+b")
-        theFile.write(bytesio.read())
-        theFile.close()
+        postResponse = send_request(tablesUrl, reqtype='post', data=csvData, stream=True,
+                                    content_type='application/json',
+                                    errmsg='Error when uploading CSV data into CasJobs table {0}'.format(tableName))
+        if postResponse.ok:
+            return True
 
-        return True
-
-    except Exception as e:
-        raise e
-
-
-# no explicit index column by default
-def getPandasDataFrameFromQuery(queryString, context="MyDB"):
-    """ Performs a quick query and outputs a Pandas dataframe
-
-    Executes a casjobs quick query and returns the result as a
-    pandas dataframe object with an index
-    (http://pandas.pydata.org/pandas-docs/stable/).
-
-    Parameters:
-        queryString (str):
-            the sql query string
-        context (str):
-            the name of the db
-
-    Returns:
-        a Pandas dataframe containing the results table
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> df = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB")
-
-    See Also:
-        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
-        CasJobs.writeFitsFileFromQuery, CasJobs.getNumpyArrayFromQuery
-
-    """
-    try:
-        cvsResponse = executeQuery(queryString, context=context, outformat="readable")
-
-        # if the index column is not specified then it will add it's own column which causes
-        # problems when uploading the transformed data
-        dataFrame = pandas.read_csv(cvsResponse, index_col=None)
-
-        return dataFrame
-
-    except Exception as e:
-        raise e
-
-
-def getNumpyArrayFromQuery(queryString, context="MyDB"):
-    """ Performs a quick query and outputs a numpy array
-
-    Executes a casjobs query and returns the results table as a Numpy array
-    (http://docs.scipy.org/doc/numpy/).
-
-    Parameters:
-        queryString (str):
-            the sql query string
-        context (str):
-            the name of the db
-
-    Returns:
-        a Numpy array storing the results table
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> array = CasJobs.getNumpyArrayFromQuery("select 1 as foo", context="MyDB")
-
-    See Also:
-        CasJobs.submitJob, CasJobs.getJobStatus, CasJobs.executeQuery,
-        CasJobs.writeFitsFileFromQuery, CasJobs.getPandasDataFrameFromQuery
-
-    """
-    try:
-
-        dataFrame = getPandasDataFrameFromQuery(queryString, context)
-        return dataFrame.as_matrix()
-
-    except Exception as e:
-        raise e
-
-
-# require pandas for now but be able to take a string in the future
-def uploadPandasDataFrameToTable(dataFrame, tableName, context="MyDB"):
-    """ Upload a Pandas dataframe
-
-    Uploads a pandas dataframe object into a CasJobs table.
-    If the dataframe contains a named index, then the index will be uploaded as
-    a column as well.
-
-    Parameters:
-        dataFrame:
-            Pandas data frame containg the data (pandas.core.frame.DataFrame)
-        tableName (str):
-            the name of the CasJobs table to be created
-        context (str):
-            the name of the db
-
-    Returns:
-        True if the dataframe was uploaded successfully
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> response = CasJobs.uploadPandasDataFrameToTable(CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB"), "NewTableFromDataFrame")
-
-    See Also:
-        CasJobs.uploadCSVDataToTable
-
-    """
-    try:
-        if dataFrame.index.name is not None and dataFrame.index.name != "":
-            sio = dataFrame.to_csv().encode("utf8")
-        else:
-            sio = dataFrame.to_csv(index_label=False, index=False).encode("utf8")
-
-        return uploadCSVDataToTable(sio, tableName, context)
-
-    except Exception as e:
-        raise e
-
-
-@checkAuth
-def uploadCSVDataToTable(csvData, tableName, context="MyDB"):
-    """
-    Uploads CSV data into a CasJobs table.
-
-    Parameters:
-        csvData:
-            a CSV table in string format.
-        tableName (str):
-            the name of the CasJobs table to be created
-        context (str):
-            the name of the db
-
-    Returns:
-        True if the csv data was uploaded successfully
-
-    Raises:
-        Throws an exception if the HTTP request to the CasJobs API returns an error.
-
-    Example:
-        >>> csv = CasJobs.getPandasDataFrameFromQuery("select 1 as foo", context="MyDB").to_csv().encode("utf8"); response = CasJobs.uploadCSVDataToTable(csv, "NewTableFromDataFrame")
-
-    See Also:
-        CasJobs.uploadPandasDataFrameToTable
-
-    """
-
-    tablesUrl = config.CasJobsRESTUri + "/contexts/" + context + "/Tables/" + tableName
-
-    postResponse = send_request(tablesUrl, reqtype='post', data=csvData, stream=True,
-                                content_type='application/json',
-                                errmsg='Error when uploading CSV data into CasJobs table {0}'.format(tableName))
-    if postResponse.ok:
-        return True

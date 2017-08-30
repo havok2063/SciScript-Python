@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:41:52
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-29 12:17:50
+# @Last Modified time: 2017-08-29 12:24:14
 
 from __future__ import print_function, division, absolute_import
 import json
@@ -39,7 +39,7 @@ class Token(object):
 
 
 class Authentication(object):
-    ''' '''
+    ''' This class handles all aspects of authenticating to SciServer '''
 
     def __init__(self, token=None):
         self.token = Token(value=token)

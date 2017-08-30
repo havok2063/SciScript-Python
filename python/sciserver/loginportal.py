@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:29:22
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-29 12:18:00
+# @Last Modified time: 2017-08-29 12:25:54
 
 from __future__ import print_function, division, absolute_import
 import warnings
@@ -30,6 +30,9 @@ class KeystoneUser(object):
 
 
 class LoginPortal(object):
+    ''' This class represents logging in to SciServer.  It has been deprecated and
+        by the Authentication class.
+    '''
 
     def __init__(self, token=None):
         warnings.warn('SciServer.LoginPortal is deprecated. '
