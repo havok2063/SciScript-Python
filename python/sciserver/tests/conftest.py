@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:24:44
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:35:39
+# @Last Modified time: 2017-08-30 11:16:13
 
 from __future__ import print_function, division, absolute_import
 import pytest
@@ -34,6 +34,8 @@ def userdata(request):
 def auth():
     auth = Authentication()
     auth.netrcpath = os.path.abspath('data/testnetrc')
+    print('netrc', os.path.isfile(auth.netrcpath))
+    print('path', auth.netrcpath)
     yield auth
     auth = None
 

@@ -26,22 +26,22 @@ See the :ref:`sciserver-ref-casjobs` reference section for all details on the Py
 
 .. rubric:: Class
 
-.. autosummary:: sciserver.casjobs
+.. autosummary:: sciserver.casjobs.CasJobs
 
 .. rubric:: Methods
 
 .. autosummary::
 
-    sciserver.casjobs.executeQuery
-    sciserver.casjobs.submitJob
-    sciserver.casjobs.waitForJob
-    sciserver.casjobs.getJobStatus
-    sciserver.casjobs.cancelJob
-    sciserver.casjobs.writeFitsFileFromQuery
-    sciserver.casjobs.getPandasDataFrameFromQuery
-    sciserver.casjobs.getNumpyArrayFromQuery
-    sciserver.casjobs.getTables
-    sciserver.casjobs.uploadPandasDataFrameToTable
-    sciserver.casjobs.uploadCSVDataToTable
+    sciserver.casjobs.CasJobs.executeQuery
+    sciserver.casjobs.CasJobs.submitJob
+    sciserver.casjobs.CasJobs.waitForJob
+    sciserver.casjobs.CasJobs.getJobStatus
+    sciserver.casjobs.CasJobs.cancelJob
+    sciserver.casjobs.CasJobs.writeFitsFileFromQuery
+    sciserver.casjobs.CasJobs.getPandasDataFrameFromQuery
+    sciserver.casjobs.CasJobs.getNumpyArrayFromQuery
+    sciserver.casjobs.CasJobs.getTables
+    sciserver.casjobs.CasJobs.uploadPandasDataFrameToTable
+    sciserver.casjobs.CasJobs.uploadCSVDataToTable
 
 
