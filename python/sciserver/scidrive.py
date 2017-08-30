@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 15:39:16
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:18:51
+# @Last Modified time: 2017-08-30 10:54:15
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -18,7 +18,7 @@ import os
 
 
 class SciDrive(object):
-    ''' '''
+    ''' This class contains methods for interacting with SciDrive '''
 
     def __init__(self):
         self.SciDriveHost = config.SciDriveHost

@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:56:07
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 09:34:53
+# @Last Modified time: 2017-08-30 10:54:27
 
 from __future__ import print_function, division, absolute_import
 from io import StringIO, BytesIO
@@ -21,7 +21,7 @@ from sciserver.utils import checkAuth, send_request
 
 
 class CasJobs(object):
-    ''' '''
+    ''' This class contains methods for interacting with CasJobs '''
 
     def __init__(self):
         self.baseURI = config.CasJobsRESTUri

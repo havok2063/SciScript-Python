@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-06 19:53:26
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:26:45
+# @Last Modified time: 2017-08-30 10:35:59
 
 from __future__ import print_function, division, absolute_import
 import pytest
@@ -30,8 +30,8 @@ class TestSkyServer(object):
 
     def test_getjpegimgcutout(self, sky):
         img = sky.getJpegImgCutout(ra=197.614455642896, dec=18.438168853724, width=512,
-                                         height=512, scale=0.4, dataRelease=SkyServer_DataRelease,
-                                         opt="OG", query="SELECT TOP 100 p.objID, p.ra, p.dec, p.r FROM fGetObjFromRectEq(197.6,18.4,197.7,18.5) n, PhotoPrimary p WHERE n.objID=p.objID")
+                                   height=512, scale=0.4, dataRelease=SkyServer_DataRelease,
+                                   opt="OG", query="SELECT TOP 100 p.objID, p.ra, p.dec, p.r FROM fGetObjFromRectEq(197.6,18.4,197.7,18.5) n, PhotoPrimary p WHERE n.objID=p.objID")
         testimg = os.path.join(os.path.dirname(__file__), 'data/TestGalaxy.jpeg')
         im = skimage.io.imread(testimg)
         assert img.tobytes() == im.tobytes()

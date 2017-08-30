@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-07 13:28:13
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 10:18:08
+# @Last Modified time: 2017-08-30 10:52:53
 
 from __future__ import print_function, division, absolute_import
 import pytest
@@ -28,17 +28,12 @@ def noscidrive(sci):
 
 
 @pytest.fixture()
-def newfile():
-    if (sys.version_info > (3, 0)):
-        file = open(SciDrive_FileName, "w")
-    else:
-        file = open(SciDrive_FileName, "wb")
+def newfile(tmpdir):
+    file = tmpdir.mkdir(SciDrive_Directory).join(SciDrive_FileName)
     file.write(SciDrive_FileContent)
-    file.close()
-    isfile = os.path.isfile(SciDrive_FileName)
+    isfile = file.check(file=1)
     assert isfile is True
-    yield isfile
-    os.remove(SciDrive_FileName)
+    yield file
 
 
 @pytest.mark.usefixtures('token')
@@ -59,10 +54,11 @@ class TestSciDrive(object):
         assert isUrl is True
 
     def test_upload(self, sci, newfile, noscidrive):
-        path = os.path.join(SciDrive_Directory, SciDrive_FileName)
-        responseUpload = sci.upload(path=path, localFilePath=SciDrive_FileName)
+        remotepath = os.path.join(SciDrive_Directory, SciDrive_FileName)
+        localpath = str(newfile)
+        responseUpload = sci.upload(path=remotepath, localFilePath=localpath)
         assert responseUpload is not None
-        assert path in responseUpload['path']
+        assert remotepath in responseUpload['path']
 
     @pytest.mark.parametrize('datatype, outformat',
                              [('file', 'StringIO'),
@@ -70,15 +66,16 @@ class TestSciDrive(object):
     def test_download(self, sci, newfile, noscidrive, datatype, outformat):
         # open a file in Python 2 or 3
 
-        path = os.path.join(SciDrive_Directory, SciDrive_FileName)
+        remotepath = os.path.join(SciDrive_Directory, SciDrive_FileName)
+        localpath = str(newfile)
 
         if datatype == 'file':
-            responseUpload = sci.upload(path=path, localFilePath=SciDrive_FileName)
-            stringio = sci.download(path=path, outformat=outformat)
+            responseUpload = sci.upload(path=remotepath, localFilePath=localpath)
+            stringio = sci.download(path=remotepath, outformat=outformat)
             data = fileContent = stringio.read()
         elif datatype == 'data':
-            responseUpload = sci.upload(path=path, data=SciDrive_FileContent)
-            data = sci.download(path=path, outformat=outformat)
+            responseUpload = sci.upload(path=remotepath, data=SciDrive_FileContent)
+            data = sci.download(path=remotepath, outformat=outformat)
 
-        assert path in responseUpload["path"]
+        assert remotepath in responseUpload["path"]
         assert data == SciDrive_FileContent
