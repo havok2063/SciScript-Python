@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:41:52
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-30 11:37:47
+# @Last Modified time: 2017-08-30 11:58:03
 
 from __future__ import print_function, division, absolute_import
 import json
@@ -131,7 +131,6 @@ class Authentication(object):
         """
 
         user, passwd = self._read_netrc()
-        print('auth login', user, passwd)
 
         auth = {"auth": {"identity": {"password": {"user": {"name": user, "password": passwd}}}}}
         data = json.dumps(auth).encode()
