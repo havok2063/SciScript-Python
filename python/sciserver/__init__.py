@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-08-13 18:02:51
+# @Last Modified time: 2017-08-30 17:51:50
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -68,9 +68,13 @@ class SciServerConfig(object):
         self.SkyQueryUrl = "http://voservices.net/skyquery/Api/V1"
         self.SkyServerWSurl = "https://skyserver.sdss.org"
         self.DataRelease = "DR13"
+        self.computeURL = 'http://scidev09.pha.jhu.edu/racm'
+        self.sciserverURL = 'http://alpha01.sciserver.org'
 
         # this path to the file containing the user's keystone token is hardcoded in the sciserver-compute environment
-        self.KeystoneTokenPath = "/home/idies/keystone.token"
+        self.idiesPath = 'home/idies'
+        self.KeystoneTokenPath = os.path.join(self.idiesPath, 'keystone.token')
+        self.computeWorkspace = os.path.join(self.idiesPath, 'workspace')
 
     def isSciServerComputeEnvironment(self):
         """
