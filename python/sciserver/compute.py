@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-10 22:27:54
+# @Last Modified time: 2017-09-10 23:57:39
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
@@ -66,7 +66,8 @@ class Job(object):
         self.status = STATUS_INFO[self.code]
         self.error_message = None
         self.verbose = verbose
-        self.set_datetimes()
+        if self.code > STATUS_CODES['FINISHED']:
+            self.set_datetimes()
 
     def __repr__(self):
         return '<Job(jobid={0.id}, status={0.status}, code={0.code})>'.format(self)

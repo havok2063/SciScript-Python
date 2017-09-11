@@ -5,6 +5,7 @@
 ### Added:
 - Global SciServer config
 - Added invoke tasks to make docs build, cleanup, and pypi deploy easier
+- Added beta Compute class and module for SciServer compute scripts
 
 ### Changed:
 - Major refactor:
