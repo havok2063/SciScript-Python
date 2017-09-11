@@ -6,17 +6,18 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-01 11:35:52
+# @Last Modified time: 2017-09-10 21:49:19
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
 from sciserver.utils import checkAuth, send_request, Task
 from sciserver.casjobs import CasJobs
+from io import StringIO
 import os
 import json
 import time
 import pandas
-
+import datetime
 
 # Questions
 # what units are startTime and submissionTime in job ? (missing decimal point)
@@ -25,6 +26,7 @@ import pandas
 # fix the SUCCES typo
 # what is meant to be difference between FINISHED and (success/errored/canceled)
 # add status for running?
+# consistency with leading slashes in paths
 #
 # benchmarck queries 1 and 3 fail both in/out compute (u'Job failed. ERROR: canceling statement due to user request')
 #
@@ -34,6 +36,9 @@ import pandas
 #
 # tried logging in and getting a token from Airport Wifi Chicago O'Hare
 # SSLError: ("bad handshake: SysCallError(54, 'ECONNRESET')",)
+
+# in submit query
+#
 
 STATUS_INFO = {1: "PENDING", 2: "QUEUED", 4: "ACCEPTED", 8: "STARTED",
                16: "FINISHED", 32: "SUCCES", 64: "ERROR", 128: "CANCELED"}
@@ -52,6 +57,18 @@ class Job(object):
         self.status = STATUS_INFO[self.code]
         self.error_message = None
         self.verbose = verbose
+        self.set_datetimes()
+
+    def __repr__(self):
+        return '<Job(jobid={0.id}, status={0.status}, code={0.code})>'.format(self)
+
+    @property
+    def result_path(self):
+        ''' Build the sub-path to the results file '''
+        resultsFolder = self.resultsFolderURI.lstrip(os.path.sep)
+        targetLoc = self.targets[0]['location'].lstrip(os.path.sep)
+        resultlink = os.path.join(resultsFolder, targetLoc)
+        return resultlink
 
     def is_finished(self):
         return self.code >= STATUS_CODES['FINISHED']
@@ -65,6 +82,42 @@ class Job(object):
             if self.verbose:
                 print('Job error message: {0}'.format(self.error_message))
         return self.error_message
+
+    def set_datetimes(self):
+        ''' converts job times into Python datetime objects '''
+        self.startTime = datetime.datetime.fromtimestamp(self.startTime * 1e-3)
+        self.submissionTime = datetime.datetime.fromtimestamp(self.submissionTime * 1e-3)
+
+    def loadDataFrame(self):
+        ''' Load the data into a Pandas Dataframe '''
+        if config.isSciServerComputeEnvironment():
+            location = '{0}{1}'.format(self.workspacePath, self.result_path)
+            df = pandas.read_csv(location)
+        else:
+            csv = self.retrieveData()
+            csv = csv.replace('{', '"{').replace('}', '}"')  # is this temporary?
+            df = pandas.read_csv(StringIO(csv), index_col=None)
+        return df
+
+    def retrieveData(self):
+        ''' Retrieve data from the server '''
+
+        assert self.status == 'SUCCES', 'Job must be successful to retrieve data'
+
+        alpha01URL = config.sciserverURL
+        datalink = os.path.join('fileservice/api/data', self.result_path)
+        fileURL = os.path.join(alpha01URL, datalink)
+
+        response = send_request(fileURL, content_type='application/json', acceptHeader='application/json',
+                                errmsg='Error when retrieving Job Results')
+        if response.ok:
+            return response.content.decode()
+
+    def upload(self, tableName, context='MyDB'):
+        ''' Upload the job csv data into user mydb '''
+        csvdata = self.retrieveData()
+        cas = CasJobs()
+        cas.uploadCSVDataToTable(csvdata, tableName, context="MyDB")
 
 
 class Compute(object):
@@ -132,7 +185,7 @@ class Compute(object):
             print('Job [{0}]'.format(self.job.status))
             return self.job
 
-    def _create_job_input(self, sql, context="manga", domainid=1, filename='result.csv',
+    def _create_job_input(self, sql, context="manga", domainid=6, filename='result.csv',
                           file_type='FILE_CSV'):
         ''' creates a job dictionary '''
         job = {"inputSql": sql,
@@ -148,7 +201,7 @@ class Compute(object):
         return job
 
     @checkAuth
-    def submitQuery(self, sql, context="manga", domainid=1, filename='result.csv', file_type='FILE_CSV'):
+    def submitQuery(self, sql, context="manga", domainid=6, filename='result.csv', file_type='FILE_CSV'):
         ''' submit a compute sql query '''
         url = os.path.join(self.jobsURL, 'jobs/rdb')
 
@@ -163,31 +216,31 @@ class Compute(object):
             jobid = jdata['id']
             return jobid
 
-    def loadDataFrame(self):
-        ''' Load the data into a Pandas Dataframe (works only on compute for now) '''
-        resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
-        targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
-        location = '{0}{1}{2}'.format(self.workspacePath, resultsFolder, targetLoc)
-        df = pandas.read_csv(location)
-        return df
+    # def loadDataFrame(self):
+    #     ''' Load the data into a Pandas Dataframe (works only on compute for now) '''
+    #     resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
+    #     targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
+    #     location = '{0}{1}{2}'.format(self.workspacePath, resultsFolder, targetLoc)
+    #     df = pandas.read_csv(location)
+    #     return df
 
-    def retrieveData(self):
-        ''' Retrieve data from the server '''
-        alpha01URL = config.sciserverURL
-        resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
-        targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
-        datalink = os.path.join('fileservice/api/data', resultsFolder, targetLoc)
-        fileURL = os.path.join(alpha01URL, datalink)
+    # def retrieveData(self):
+    #     ''' Retrieve data from the server '''
+    #     alpha01URL = config.sciserverURL
+    #     resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
+    #     targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
+    #     datalink = os.path.join('fileservice/api/data', resultsFolder, targetLoc)
+    #     fileURL = os.path.join(alpha01URL, datalink)
 
-        response = send_request(fileURL, content_type='application/json', acceptHeader='application/json',
-                                errmsg='Error when retrieving Job Results')
-        if response.ok:
-            return response.content
+    #     response = send_request(fileURL, content_type='application/json', acceptHeader='application/json',
+    #                             errmsg='Error when retrieving Job Results')
+    #     if response.ok:
+    #         return response.content
 
-    def upload(self, tableName, context='MyDB'):
-        ''' Upload a csv data file into user mydb '''
-        csvdata = self.retrieveData()
-        cas = CasJobs()
-        cas.uploadCSVDataToTable(csvdata, tableName, context="MyDB")
+    # def upload(self, tableName, context='MyDB'):
+    #     ''' Upload a csv data file into user mydb '''
+    #     csvdata = self.retrieveData()
+    #     cas = CasJobs()
+    #     cas.uploadCSVDataToTable(csvdata, tableName, context="MyDB")
 
 
