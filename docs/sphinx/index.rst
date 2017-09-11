@@ -25,6 +25,7 @@ Components
    :maxdepth: 1
 
    casjobs
+   compute
    scidrive
    skyquery
    skyserver

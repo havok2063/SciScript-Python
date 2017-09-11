@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-10 21:49:19
+# @Last Modified time: 2017-09-10 22:27:54
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
@@ -49,6 +49,15 @@ class Job(object):
     ''' This class represents a Compute Job '''
 
     def __init__(self, jobinfo, verbose=None):
+        ''' A SciServer Compute Job
+
+        Parameters:
+            jobinfo (dict):
+                A dictionary of job information.  Returned by the Compute System
+            verbose (bool):
+                If True, outputs more info to the screen
+
+        '''
         assert isinstance(jobinfo, dict), 'Job Info must be a dictionary object'
         # set class attributes
         for key, val in jobinfo.items():
@@ -71,12 +80,15 @@ class Job(object):
         return resultlink
 
     def is_finished(self):
+        ''' Check if the job is finished or not '''
         return self.code >= STATUS_CODES['FINISHED']
 
     def to_dict(self):
+        ''' Converts the Job to a dictionary '''
         return self.__dict__
 
     def check_error(self):
+        ''' Checks the job for an error message '''
         if self.status in ['ERROR', 'CANCELED']:
             self.error_message = self.messages[0]['content']
             if self.verbose:
@@ -84,12 +96,17 @@ class Job(object):
         return self.error_message
 
     def set_datetimes(self):
-        ''' converts job times into Python datetime objects '''
+        ''' Converts job times into Python datetime objects '''
         self.startTime = datetime.datetime.fromtimestamp(self.startTime * 1e-3)
         self.submissionTime = datetime.datetime.fromtimestamp(self.submissionTime * 1e-3)
 
     def loadDataFrame(self):
-        ''' Load the data into a Pandas Dataframe '''
+        ''' Load the data into a Pandas Dataframe
+
+        Returns:
+            A Pandas Dataframe of the results
+
+        '''
         if config.isSciServerComputeEnvironment():
             location = '{0}{1}'.format(self.workspacePath, self.result_path)
             df = pandas.read_csv(location)
@@ -100,7 +117,12 @@ class Job(object):
         return df
 
     def retrieveData(self):
-        ''' Retrieve data from the server '''
+        ''' Retrieve data from the server
+
+        Returns:
+            A string representation of the CSV results data file
+
+        '''
 
         assert self.status == 'SUCCES', 'Job must be successful to retrieve data'
 
@@ -114,7 +136,18 @@ class Job(object):
             return response.content.decode()
 
     def upload(self, tableName, context='MyDB'):
-        ''' Upload the job csv data into user mydb '''
+        ''' Upload the job csv data into user mydb
+
+        Uploads the Job results into MyDB using the SciServer
+        CasJobs class.
+
+        Parameters:
+            tableName (str):
+                The name of the table of create in MyDB
+            context (str):
+                The database name.  Default is MyDB
+
+        '''
         csvdata = self.retrieveData()
         cas = CasJobs()
         cas.uploadCSVDataToTable(csvdata, tableName, context="MyDB")
@@ -131,7 +164,15 @@ class Compute(object):
 
     @checkAuth
     def retrieveDomains(self):
-        ''' retrieve a list of domains '''
+        ''' Retrieve a list of domains
+
+        Retrieve a list of compute domains.  These are the available
+        domains to submit jobs to, indicated by 'id'
+
+        Returns:
+            A list of compute domains (as JSON dictionaries).
+
+        '''
         jobdomains = 'computedomains/rdb'
         domainurl = os.path.join(self.jobsURL, jobdomains)
 
@@ -142,7 +183,16 @@ class Compute(object):
             return jsonres
 
     def getJobs(self, status=None):
-        ''' Get a list of all jobs '''
+        ''' Get a list of all jobs
+
+        Parameters:
+            status (str):
+                A specific status of jobs to return
+
+        Returns:
+            A list of SciServer Jobs with the given status
+
+        '''
         joburl = 'jobs'
         url = os.path.join(self.jobsURL, joburl)
         response = send_request(url, content_type='application/json', acceptHeader='application/json',
@@ -155,7 +205,18 @@ class Compute(object):
             return joblist
 
     def getJob(self, jobid):
-        ''' get a job '''
+        ''' Get a job
+
+        Get a compute job with a specific job id
+
+        Parameters:
+            jobid (int):
+                The job id to request
+
+        Returns:
+            The SciServer Job with the requested id.
+
+        '''
         joburl = 'jobs/{0}'.format(jobid)
         url = os.path.join(self.jobsURL, joburl)
 
@@ -166,18 +227,45 @@ class Compute(object):
             return Job(jobjson)
 
     def getJobStatus(self, jobid):
-        ''' Retrieve status of job '''
+        ''' Retrieve status of job
+
+        Parameters:
+            jobid (int):
+                The job id to request
+
+        Returns:
+            A tuple of the job status code, and string status
+
+        '''
         self.job = self.getJob(jobid)
         return (self.job.code, self.job.status)
 
     def isJobFinished(self, jobid):
-        ''' Returns true if job is finished '''
+        ''' Checks if job is finished
+
+        Parameters:
+            jobid (int):
+                The job id to request
+
+        Returns:
+            True if the job has a status of FINISHED
+
+        '''
         self.job = self.getJob(jobid)
         return self.job.is_finished()
 
     @checkAuth
     def waitFor(self, jobid):
-        ''' wait for the job to finish '''
+        ''' Wait for the job to finish
+
+        Parameters:
+            jobid (int):
+                The job id to request
+
+        Returns:
+            The SciServer Job
+
+        '''
         while not self.isJobFinished(jobid):
             print('Wait [{0}] ... '.format(self.job.status))
             time.sleep(1)
@@ -202,7 +290,25 @@ class Compute(object):
 
     @checkAuth
     def submitQuery(self, sql, context="manga", domainid=6, filename='result.csv', file_type='FILE_CSV'):
-        ''' submit a compute sql query '''
+        ''' Submit a SQL query to compute
+
+        Parameters:
+            sql (str):
+                The sql query string to submit
+            context (str):
+                The database to connect to
+            domainId (int):
+                The compute domain id to connect to
+            filename (str):
+                The filename of the query results
+            file_type (str):
+                The type of file to save the results as
+
+        Returns:
+            jobid (int):
+                The job id of the submitted query
+
+        '''
         url = os.path.join(self.jobsURL, 'jobs/rdb')
 
         job = self._create_job_input(sql, context=context, domainid=domainid, filename=filename, file_type=file_type)
@@ -215,32 +321,4 @@ class Compute(object):
             jdata = json.loads(response.content.decode())
             jobid = jdata['id']
             return jobid
-
-    # def loadDataFrame(self):
-    #     ''' Load the data into a Pandas Dataframe (works only on compute for now) '''
-    #     resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
-    #     targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
-    #     location = '{0}{1}{2}'.format(self.workspacePath, resultsFolder, targetLoc)
-    #     df = pandas.read_csv(location)
-    #     return df
-
-    # def retrieveData(self):
-    #     ''' Retrieve data from the server '''
-    #     alpha01URL = config.sciserverURL
-    #     resultsFolder = self.job['resultsFolderURI'].lstrip(os.path.sep)
-    #     targetLoc = self.job['targets'][0]['location'].lstrip(os.path.sep)
-    #     datalink = os.path.join('fileservice/api/data', resultsFolder, targetLoc)
-    #     fileURL = os.path.join(alpha01URL, datalink)
-
-    #     response = send_request(fileURL, content_type='application/json', acceptHeader='application/json',
-    #                             errmsg='Error when retrieving Job Results')
-    #     if response.ok:
-    #         return response.content
-
-    # def upload(self, tableName, context='MyDB'):
-    #     ''' Upload a csv data file into user mydb '''
-    #     csvdata = self.retrieveData()
-    #     cas = CasJobs()
-    #     cas.uploadCSVDataToTable(csvdata, tableName, context="MyDB")
-
 

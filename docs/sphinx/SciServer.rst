@@ -18,6 +18,16 @@ Casjobs
     :undoc-members:
     :show-inheritance:
 
+.. _sciserver-ref-compute:
+
+Compute
+-------
+
+.. automodule:: sciserver.compute
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. _sciserver-ref-auth:
 
 Authentication
