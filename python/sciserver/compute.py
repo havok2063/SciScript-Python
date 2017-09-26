@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-10 23:57:39
+# @Last Modified time: 2017-09-26 11:36:46
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
@@ -20,15 +20,8 @@ import pandas
 import datetime
 
 # Questions
-# what units are startTime and submissionTime in job ? (missing decimal point)
 # add a runTime or endTime
 # can get a list of (finished | pending | running | errored) jobs?
-# fix the SUCCES typo
-# what is meant to be difference between FINISHED and (success/errored/canceled)
-# add status for running?
-# consistency with leading slashes in paths
-#
-# benchmarck queries 1 and 3 fail both in/out compute (u'Job failed. ERROR: canceling statement due to user request')
 #
 # login in compute - do stuff in notebook - token times out
 # login again but don't open new container..use open notebook without having to close it
@@ -37,11 +30,14 @@ import datetime
 # tried logging in and getting a token from Airport Wifi Chicago O'Hare
 # SSLError: ("bad handshake: SysCallError(54, 'ECONNRESET')",)
 
-# in submit query
-#
+# option to load to mydb on backend when submit query
+#   - backend results get pushed to file and mydb
+# what does targets['type'] refer to?
+# - in submitQuery - make new target_type for file and mydb?
+#   - have tablename as option, tablename, filename, file_type?
 
 STATUS_INFO = {1: "PENDING", 2: "QUEUED", 4: "ACCEPTED", 8: "STARTED",
-               16: "FINISHED", 32: "SUCCES", 64: "ERROR", 128: "CANCELED"}
+               16: "FINISHED", 32: "SUCCESS", 64: "ERROR", 128: "CANCELED"}
 STATUS_CODES = {v: k for k, v in STATUS_INFO.items()}
 
 
@@ -59,6 +55,7 @@ class Job(object):
 
         '''
         assert isinstance(jobinfo, dict), 'Job Info must be a dictionary object'
+        self._orig = jobinfo
         # set class attributes
         for key, val in jobinfo.items():
             self.__setattr__(key, val)
@@ -98,6 +95,8 @@ class Job(object):
 
     def set_datetimes(self):
         ''' Converts job times into Python datetime objects '''
+
+        # multiply by 1e-3 to convert times from milliseconds to seconds
         self.startTime = datetime.datetime.fromtimestamp(self.startTime * 1e-3)
         self.submissionTime = datetime.datetime.fromtimestamp(self.submissionTime * 1e-3)
 
@@ -125,7 +124,7 @@ class Job(object):
 
         '''
 
-        assert self.status == 'SUCCES', 'Job must be successful to retrieve data'
+        assert self.status == 'SUCCESS', 'Job must be successful to retrieve data'
 
         alpha01URL = config.sciserverURL
         datalink = os.path.join('fileservice/api/data', self.result_path)
@@ -162,6 +161,7 @@ class Compute(object):
         self.workspacePath = config.computeWorkspace
         self.jobsURL = os.path.join(self.computeURL, 'jobm/rest')
         self.job = None
+        self.targets = []
 
     @checkAuth
     def retrieveDomains(self):
@@ -274,23 +274,52 @@ class Compute(object):
             print('Job [{0}]'.format(self.job.status))
             return self.job
 
-    def _create_job_input(self, sql, context="manga", domainid=6, filename='result.csv',
-                          file_type='FILE_CSV'):
+    def add_target(self, target_type, tablename='mytable', filename='results.csv', file_type='CSV'):
+        ''' Add a target location for query results '''
+
+        tt = target_type.upper()
+        assert tt in ['FILE', 'TABLE'], 'target_type can only be FILE or TABLE'
+
+        # existing types
+        types = [t['type'] for t in self.targets]
+
+        # add a table
+        if tt == 'TABLE':
+            tab_targ = {'location': tablename, 'type': tt, 'resultNumber': 1}
+            if tt in types:
+                tindex = types.index(tt)
+                self.targets[tindex] = tab_targ
+            else:
+                self.targets.append(tab_targ)
+
+        # add a file
+        if tt == 'FILE':
+            filetype = '{0}_{1}'.format(tt, file_type.upper())
+            file_targ = {'location': filename, 'type': filetype, 'resultNumber': 1}
+            if filetype in types:
+                tindex = types.index(filetype)
+                self.targets[tindex] = file_targ
+            else:
+                self.targets.append(file_targ)
+
+    def _create_job_input(self, sql, context="manga", domainid=7, filename='results.csv',
+                          file_type='CSV', target_type='FILE', tablename='mytable'):
         ''' creates a job dictionary '''
+
+        # add the target for the results
+        if not self.targets:
+            self.add_target(target_type, tablename=tablename, filename=filename, file_type=file_type)
+
         job = {"inputSql": sql,
-               "targets": [
-                   {
-                       "location": filename,
-                       "type": file_type,
-                       "resultNumber": 1
-                   }],
+               "targets": self.targets,
                "databaseContextName": context,
                "rdbDomainId": domainid
                }
         return job
 
     @checkAuth
-    def submitQuery(self, sql, context="manga", domainid=6, filename='result.csv', file_type='FILE_CSV'):
+    def submitQuery(self, sql, context="manga", queue='quick', target_type='FILE',
+                    tablename='mytable', filename='results.csv', file_type='CSV'):
         ''' Submit a SQL query to compute
 
         Parameters:
@@ -300,6 +329,10 @@ class Compute(object):
                 The database to connect to
             domainId (int):
                 The compute domain id to connect to
+            target_type (str):
+                Type of output results.  Either TABLE or FILE
+            tablename (str):
+                The MyDB tablename to save the results to
             filename (str):
                 The filename of the query results
             file_type (str):
@@ -312,7 +345,12 @@ class Compute(object):
         '''
         url = os.path.join(self.jobsURL, 'jobs/rdb')
 
-        job = self._create_job_input(sql, context=context, domainid=domainid, filename=filename, file_type=file_type)
+        # set the domainid based on the query queue
+        assert queue in ['quick', 'long'], 'Query queue must be either quick or long'
+        domainid = 6 if queue == 'quick' else 7
+
+        job = self._create_job_input(sql, context=context, domainid=domainid, target_type=target_type,
+                                     tablename=tablename, filename=filename, file_type=file_type)
 
         data = json.dumps(job)
 
