@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-26 11:36:46
+# @Last Modified time: 2017-09-28 14:55:42
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
@@ -303,7 +303,8 @@ class Compute(object):
                 self.targets.append(file_targ)
 
     def _create_job_input(self, sql, context="manga", domainid=7, filename='results.csv',
-                          file_type='CSV', target_type='FILE', tablename='mytable'):
+                          file_type='CSV', target_type='FILE', tablename='mytable',
+                          name='sciserver_query'):
         ''' creates a job dictionary '''
 
         # add the target for the results
@@ -313,13 +314,15 @@ class Compute(object):
         job = {"inputSql": sql,
                "targets": self.targets,
                "databaseContextName": context,
-               "rdbDomainId": domainid
+               "rdbDomainId": domainid,
+               "submitterDID": name
                }
         return job
 
     @checkAuth
     def submitQuery(self, sql, context="manga", queue='quick', target_type='FILE',
-                    tablename='mytable', filename='results.csv', file_type='CSV'):
+                    tablename='mytable', filename='results.csv', file_type='CSV',
+                    name='sciserver_query'):
         ''' Submit a SQL query to compute
 
         Parameters:
@@ -337,6 +340,8 @@ class Compute(object):
                 The filename of the query results
             file_type (str):
                 The type of file to save the results as
+            name (str):
+                The name of the query to be submitted
 
         Returns:
             jobid (int):
@@ -350,7 +355,7 @@ class Compute(object):
         domainid = 6 if queue == 'quick' else 7
 
         job = self._create_job_input(sql, context=context, domainid=domainid, target_type=target_type,
-                                     tablename=tablename, filename=filename, file_type=file_type)
+                                     tablename=tablename, filename=filename, file_type=file_type, name=name)
 
         data = json.dumps(job)
 
