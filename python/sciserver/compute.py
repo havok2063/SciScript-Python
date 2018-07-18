@@ -6,18 +6,20 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-30 14:58:30
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-28 14:55:42
+# @Last Modified time: 2017-10-16 15:45:23
 
 from __future__ import print_function, division, absolute_import
 from sciserver import config
 from sciserver.utils import checkAuth, send_request, Task
 from sciserver.casjobs import CasJobs
+from sciserver.exceptions import SciServerError
 from io import StringIO
 import os
 import json
 import time
 import pandas
 import datetime
+import re
 
 # Questions
 # add a runTime or endTime
@@ -162,6 +164,18 @@ class Compute(object):
         self.jobsURL = os.path.join(self.computeURL, 'jobm/rest')
         self.job = None
         self.targets = []
+        self.set_domains()
+
+    def set_domains(self):
+        ''' Set the domains for the short and long queues '''
+        comp = re.compile('\(([a-z]+)\)')
+        domains = self.retrieveDomains()
+        try:
+            self.domains = {comp.search(dom['name']).group(1): dom['id'] for dom in domains}
+        except AttributeError as e:
+            self.domains = None
+        else:
+            self.domains['quick'] = self.domains['short']
 
     @checkAuth
     def retrieveDomains(self):
@@ -302,10 +316,17 @@ class Compute(object):
             else:
                 self.targets.append(file_targ)
 
-    def _create_job_input(self, sql, context="manga", domainid=7, filename='results.csv',
+    def _create_job_input(self, sql, context="manga", queue='quick', filename='results.csv',
                           file_type='CSV', target_type='FILE', tablename='mytable',
                           name='sciserver_query'):
         ''' creates a job dictionary '''
+
+        # set the domainid based on the query queue
+        assert queue in ['short', 'quick', 'long'], 'Query queue must be either short/quick or long'
+        if self.domains:
+            domainid = self.domains[queue]
+        else:
+            raise SciServerError('No domainid lookup found.  Check retrieveDomains for domain names.')
 
         # add the target for the results
         if not self.targets:
@@ -350,11 +371,7 @@ class Compute(object):
         '''
         url = os.path.join(self.jobsURL, 'jobs/rdb')
 
-        # set the domainid based on the query queue
-        assert queue in ['quick', 'long'], 'Query queue must be either quick or long'
-        domainid = 6 if queue == 'quick' else 7
-
-        job = self._create_job_input(sql, context=context, domainid=domainid, target_type=target_type,
+        job = self._create_job_input(sql, context=context, queue=queue, target_type=target_type,
                                      tablename=tablename, filename=filename, file_type=file_type, name=name)
 
         data = json.dumps(job)
