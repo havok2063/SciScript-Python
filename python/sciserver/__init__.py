@@ -6,7 +6,7 @@
 # @Author: Brian Cherinka
 # @Date:   2017-08-04 14:21:05
 # @Last modified by:   Brian Cherinka
-# @Last Modified time: 2017-09-15 16:12:49
+# @Last Modified time: 2018-02-23 13:43:43
 
 from __future__ import print_function, division, absolute_import
 import os
@@ -63,13 +63,13 @@ class SciServerConfig(object):
 
         # URLs for accessing SciServer web services (API endpoints)
         self.CasJobsRESTUri = "https://skyserver.sdss.org/CasJobs/RestApi"
-        self.AuthenticationURL = "https://portal.sciserver.org/login-portal/keystone/v3/tokens"
+        self.AuthenticationURL = "https://alpha02.sciserver.org/login-portal/keystone/v3/tokens"
         self.SciDriveHost = "https://www.scidrive.org"
         self.SkyQueryUrl = "http://voservices.net/skyquery/Api/V1"
         self.SkyServerWSurl = "https://skyserver.sdss.org"
         self.DataRelease = "DR13"
-        self.computeURL = 'http://scitest12.pha.jhu.edu/racm'
-        self.sciserverURL = 'http://alpha01.sciserver.org'
+        self.computeURL = 'https://alpha02.sciserver.org/racm'  #scitest12.pha.jhu.edu/racm'
+        self.sciserverURL = 'https://alpha02.sciserver.org'
 
         # this path to the file containing the user's keystone token is hardcoded in the sciserver-compute environment
         self.idiesPath = 'home/idies'
